@@ -146,7 +146,7 @@ export default function DbTabsViewer(props) {
     <div style={{ width: '80%' }}>
         <Box sx={{ width: '100%' }}>
             <Box className={styles.tabsBox}>
-                <Tabs value={database} onChange={(event, newValue) => { setDatabase(newValue) }} aria-label="basic tabs example" variant="fullWidth" centered>
+                <Tabs value={database} onChange={(event, newValue) => { setDatabase(newValue) }} aria-label="basic tabs example" variant="fullWidth" scrollButtons={true} centered>
                     {
                         (database == 0)
                             ?

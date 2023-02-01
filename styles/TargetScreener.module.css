@@ -15,6 +15,14 @@
     gap: 25px;
   }
 
+  .rowFlexbox {
+    display: flex;
+    /* flex-wrap: wrap; */
+    align-items: center;
+    gap: 25px;
+    margin-top: auto;
+  }
+
   .verticalFlexbox {
     display: flex;
     flex-direction: column;
@@ -35,4 +43,38 @@
     align-items: center;
     padding-left: 10%;
     padding-right: 10%;
+  }
+
+  .drawerButton {
+    display: none;
+    margin-bottom: auto;
+    border-radius: 0%;
+  }
+
+  .panel {
+    height: 100%;
+    text-align: center;
+    font-size: 20px;
+    background-color: #af8aba;
+    overflow-x: hidden;
+    border-radius: 10px;
+  }
+
+  .drawer {
+    height: 100%;
+    text-align: center;
+    font-size: 20px;
+    background-color: #af8aba;
+    overflow-x: hidden;
+  }
+
+
+
+  @media only screen and (max-width: 1315px) {
+    .sidePanel {
+      display: none;
+    }
+    .drawerButton {
+      display: flex;
+    }
   }

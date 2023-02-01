@@ -5,6 +5,7 @@ import styles from '../styles/TargetScreener.module.css';
 import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
+import SideBar from '../components/sideBar';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -30,7 +31,9 @@ import exampleData from '../public/files/GSE49155.json';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
+import { Drawer } from '@mui/material';
 
 
 export default function Page() {
@@ -46,9 +49,13 @@ export default function Page() {
 
     const [precomputedBackground, setPrecomputedBackground] = React.useState(0);
 
+    const [drawerState, setDrawerState] = useState(false);
+        
+    const toggleDrawer = (open) => (event) => {
+        setDrawerState(open);
+    };
 
     const router = useRouter();
-
 
     async function submitGeneStats(fileStats) {
 
@@ -195,12 +202,35 @@ export default function Page() {
 
                 <Header />
 
-                <h1>Target Screener</h1>
-
+                
+                <div className={styles.rowFlexbox}>
+                <div className={styles.sidePanel}>
+                <Box
+                        sx={{ width: '375px', height: '100%' }}
+                        className={styles.panel}
+                    >
+                    <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground}/>
+                </Box>
+                </div>
+                <div className={styles.drawerButton}>
+                    <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{transform: 'scale(2)', alignItems: 'start'}} /></Button>
+                    <Drawer
+                            anchor={'left'}
+                            open={drawerState}
+                            onClose={toggleDrawer(false)}
+                        >
+                            <Box
+                        sx={{ width: '375px', height: '100%' }}
+                        className={styles.drawer}
+                            >
+                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground}/>
+                        </Box>
+                    </Drawer>
+                </div>
+                
                 <Card>
+                    <h1 style={{ textAlign: 'center', gap: '50px' }}>Target Screener</h1>
                     <CardContent>
-
-
                         <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
 
                             <div className={styles.verticalFlexbox}>
@@ -325,10 +355,6 @@ export default function Page() {
                                     <div>Prioritize membrane genes</div>
                                 </div>
                             </div>
-
-
-
-
                         </div>
                     </CardContent>
                     <CardActions style={{ justifyContent: 'center' }}>
@@ -338,6 +364,7 @@ export default function Page() {
                 <>
                 {alert}
                 </>
+                </div>
                 <Footer />
             </div>
         </div>
