@@ -36,9 +36,6 @@ export default function DbTabsViewer(props) {
         orientation: 'h',
     }
 
-
-    console.log(gene_data)
-
     function TabPanel(props) {
         const {children, value, index, classes, ...other} = props;
     
@@ -76,7 +73,6 @@ export default function DbTabsViewer(props) {
     }
     if ('ARCHS4' in result.sorted_data) {
         archs4 = result.sorted_data.ARCHS4;
-        console.log(archs4)
     } 
     if ('Tabula_Sapiens' in result.sorted_data) {
         tabula_sapiens = result.sorted_data.Tabula_Sapiens;
@@ -145,10 +141,6 @@ export default function DbTabsViewer(props) {
     let gtex_proteomics_title = props.gene + ' Protein Expression across GTEx Tissues';
     let ccle_transcriptomics_title = props.gene + ' Expression across CCLE Cell Lines';
     let ccle_proteomics_title = props.gene + ' Protein Expression across CCLE Cell Lines';
-
-
-    console.log(archs4)
-
 
     return (
     <div style={{ width: '80%' }}>

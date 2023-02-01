@@ -60,7 +60,6 @@ export default function Results() {
           body: JSON.stringify({ 'gene': gene })
         })
         const json = await res.json()
-        console.log(json)
         setTabsData(json)
       }
 

@@ -152,11 +152,6 @@ export default function Page() {
             } else {
 
                 setLoading(true);
-
-                const params = { membraneGenes, showProteinProfiles }
-
-                setLoading(false);
-
                 handleFileChosen(file)
             }
         } else {

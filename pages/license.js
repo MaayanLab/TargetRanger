@@ -22,7 +22,7 @@ export default function Page() {
 
                     <h1>Usage License</h1>
 
-                    <div>The services provided by GeneRanger are free for academic, non-profit use. Regarding the use of the data, please check the terms of use at the original data sources.</div>
+                    <div>The services provided by TargetRanger are free for academic, non-profit use. Regarding the use of the data, please check the terms of use at the original data sources.</div>
 
                 </div>
 
