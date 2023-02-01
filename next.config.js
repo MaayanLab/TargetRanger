@@ -7,7 +7,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/gene/A2M?database=ARCHS4',
+        destination: '/targetscreener',
         permanent: false,
       },
     ]

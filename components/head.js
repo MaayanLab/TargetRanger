@@ -7,7 +7,7 @@ export default class Header extends React.Component {
         return (
 
             <Head>
-                <title>GeneRanger</title>
+                <title>TargetRanger</title>
                 <link rel="icon" href="/images/logo.png" />
             </Head>
                
