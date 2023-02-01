@@ -73,7 +73,7 @@ export default function TargetResultTable(props) {
     function CustomToolbar() {
       return (
         <GridToolbarContainer>
-          <GridToolbarExport printOptions={{ disableToolbarButton: true }} />
+          <GridToolbarExport printOptions={{ disableToolbarButton: true }} color="secondary"/>
         </GridToolbarContainer>
       );
     }
@@ -97,6 +97,17 @@ export default function TargetResultTable(props) {
                 rows={results}
                 columns={columns}
                 filterModel={filt}
+                sx={{
+                  boxShadow: 2,
+                  border: 2,
+                  borderColor: 'secondary.light',
+                  '& .MuiDataGrid-cell:hover': {
+                    color: 'secondary.main',
+                  },
+                  '& .MuiDataGrid-toolbarContainer': {
+                    color: 'secondary.main',
+                  },
+                }}
                 onFilterModelChange={(newFilterModel) =>
                  setFilt(newFilterModel)
                 }

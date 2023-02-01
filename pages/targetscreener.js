@@ -112,7 +112,12 @@ export default function Page() {
 
     const handleFileRead = (e) => {
         const content = fileReader.result;
-        var rows = content.split('\n').map(row => row.split('\t'))
+        var rows = content.split('\n')
+        if (rows[1].includes(',')) {
+            rows = rows.map(row => row.split(','))
+        } else {
+            rows = rows.map(row => row.split('\t'))
+        }
         var n = rows[0].length - 1
         geneStats = {}
         var gene;

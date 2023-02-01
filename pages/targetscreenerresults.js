@@ -88,7 +88,7 @@ export default function Results() {
           <div className={styles.horizontalFlexbox}>
             <div style={{ width: '250px' }}>Prioritize membrane genes:</div>
             <ToggleButtonGroup
-              color="primary"
+              color="secondary"
               value={membraneGenes}
               exclusive
               onChange={(event, newValue) => {
@@ -116,8 +116,9 @@ export default function Results() {
               value={''}
               options={geneList}
               sx={{ width: 400 }}
+              color="secondary"
               onChange={(event, value) => { setGene(value) }}
-              renderInput={(params) => <TextField {...params} label="Gene Symbol" />}
+              renderInput={(params) => <TextField {...params} color="secondary" label="Gene Symbol" />}
             />
 
           </div>
@@ -137,7 +138,7 @@ export default function Results() {
             <Header />
             <p>Error: No results found</p>
             <p>Please try resubmitting your data</p>
-            <Button variant="contained" color="primary" href="targetscreener">Target Screener</Button>
+            <Button variant="contained" color="secondary" href="targetscreener">Target Screener</Button>
             <Footer />
           </div>
         </div>
