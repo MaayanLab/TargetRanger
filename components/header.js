@@ -17,7 +17,7 @@ export default class Header extends React.Component {
                         </Link>
                     </div>
 
-                    <div className={styles.text}><b>TargetRanger is a web-server application that identifies targets from user-inputted data by comparing it to processed data of the expression of human genes and proteins across human cell types, tissues, and cell lines from several atlases.</b></div>
+                    <div className={styles.text}><b>TargetRanger is a web-server application that identifies targets from user-inputted RNA-seq samples collected from the cells we wish to target. By comparing the inputted samples with processed RNA-seq and proteomics data from several atlases, TargetRanger identifies genes that are highly expressed in the target cells while lowly expressed across normal human cell types, tissues, and cell lines.</b></div>
                     <div className={styles.rightDiv}>
                             <div className={styles.verticalFlexbox}>
                             <b style={{fontSize: '16px', marginBottom: '5px'}}>Explore single gene expression across tissues and cell types with:</b>
