@@ -15,7 +15,7 @@ export default function TargetResultTable(props) {
     const setGene = props.setgene;
 
     const columns = [
-        { field: "gene", headerName: "Gene", minWidth: 100, flex: 1},
+        { field: "gene", headerName: "Target", minWidth: 100, flex: 1},
         { field: "t", headerName: "t statistic", type: "number", flex: 1, minWidth: 150 },
         { field: "p", headerName: "P-value", type: "number", flex: 1, minWidth: 200 },
         { field: "log2fc", headerName: "log2 Fold Change", type: "number", flex: 1, minWidth: 160},

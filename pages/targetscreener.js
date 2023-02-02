@@ -50,7 +50,7 @@ export default function Page() {
     const [precomputedBackground, setPrecomputedBackground] = React.useState(0);
 
     const [drawerState, setDrawerState] = useState(false);
-        
+
     const toggleDrawer = (open) => (event) => {
         setDrawerState(open);
     };
@@ -165,7 +165,7 @@ export default function Page() {
             setAlert(<Alert variant="outlined" severity="error">Please select a file to submit</Alert>)
             setTimeout(() => {
                 setAlert('');
-              }, 3000);
+            }, 3000);
         }
     }
 
@@ -202,168 +202,168 @@ export default function Page() {
 
                 <Header />
 
-                
+
                 <div className={styles.rowFlexbox}>
-                <div className={styles.sidePanel}>
-                <Box
-                        sx={{ width: '375px', height: '100%' }}
-                        className={styles.panel}
-                    >
-                    <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground}/>
-                </Box>
-                </div>
-                <div className={styles.drawerButton}>
-                    <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{transform: 'scale(2)', alignItems: 'start'}} /></Button>
-                    <Drawer
+                    <div className={styles.sidePanel}>
+                        <Box
+                            sx={{ width: '375px', height: '100%' }}
+                            className={styles.panel}
+                        >
+                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                        </Box>
+                    </div>
+                    <div className={styles.drawerButton}>
+                        <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{ transform: 'scale(2)', alignItems: 'start' }} /></Button>
+                        <Drawer
                             anchor={'left'}
                             open={drawerState}
                             onClose={toggleDrawer(false)}
                         >
                             <Box
-                        sx={{ width: '375px', height: '100%' }}
-                        className={styles.drawer}
+                                sx={{ width: '375px', height: '100%' }}
+                                className={styles.drawer}
                             >
-                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground}/>
-                        </Box>
-                    </Drawer>
-                </div>
-                
-                <Card>
-                    <CardContent>
-                        <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
+                                <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                            </Box>
+                        </Drawer>
+                    </div>
 
-                            <div className={styles.verticalFlexbox}>
-
-                                
-
-                                <div className={styles.horizontalFlexbox}>
-
-                                    <div className={styles.verticalFlexbox}>
-                                    <div>Upload RNA-seq profiles from the cells that you wish to target and remove</div>
-                                        <input
-                                            style={{ display: "none" }}
-                                            id="fileUpload"
-                                            type="file"
-                                            onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]) }}
-                                        />
-                                        <label htmlFor="fileUpload">
-                                            <Button variant="contained" color="secondary" component="span">
-                                                Upload File
-                                            </Button>
-                                        </label>
-                                        <div className={styles.horizontalFlexbox}>
-                                            <Button onClick={() => setUseDefaultFile(true)} className={styles.darkOnHover} variant="text" color="secondary">
-                                                Load example file
-                                            </Button>
-                                            <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
-                                                <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
-                                                    Download example file
-                                                </Button>
-                                            </a>
-                                        </div>
-                                        <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
-                                            File specifications
-                                        </Button>
-                                        <Popover
-                                            open={Boolean(anchorEl)}
-                                            anchorEl={anchorEl}
-                                            onClose={() => { setAnchorEl(null) }}
-                                            anchorOrigin={{
-                                                vertical: 'bottom',
-                                                horizontal: 'center',
-                                            }}
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'center',
-                                            }}
-                                        >
-                                            <TableContainer component={Paper}>
-                                                <Typography
-                                                    sx={{ textAlign: 'center' }}
-                                                    variant="h6"
-                                                >
-                                                    File should be a tsv/csv of the following form:
-                                                </Typography>
-                                                <Table sx={{ width: 500 }} size="small">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell></TableCell>
-                                                            <TableCell align="right"><b>Replicate 1</b></TableCell>
-                                                            <TableCell align="right"><b>Replicate 2</b></TableCell>
-                                                            <TableCell align="right"><b>...</b></TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {rows.map((row) => (
-                                                            <TableRow key={row.name}>
-                                                                <TableCell><b>{row.name}</b></TableCell>
-                                                                <TableCell align="right">{row.rep1}</TableCell>
-                                                                <TableCell align="right">{row.rep2}</TableCell>
-                                                                <TableCell align="right">{row.rep3}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </TableContainer>
-                                        </Popover>
-
-                                        <Button onClick={() => { setUseDefaultFile(false); setFile(null) }} variant="outlined" component="span" color="secondary">
-                                            Clear Chosen File
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div>Chosen file:</div>
-                                <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
-
-                            </div>
-
-                            <div style={{ alignItems: 'flex-start' }} className={styles.verticalFlexbox}>
-
-                            </div>
-
-                            <div className={styles.verticalFlexbox}>
+                    <Card>
+                        <CardContent>
+                            <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
 
                                 <div className={styles.verticalFlexbox}>
-                                    <div>Normal tissue background:</div>
+
+
 
                                     <div className={styles.horizontalFlexbox}>
-                                        <Box sx={{ width: 390 }}>
-                                            <FormControl fullWidth>
-                                                <Select
-                                                    color="secondary"
-                                                    value={precomputedBackground}
-                                                    onChange={(event) => setPrecomputedBackground(event.target.value)}
-                                                >
-                                                    <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq)</MenuItem>
-                                                    <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq)</MenuItem>
-                                                    <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq)</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Box>
+
+                                        <div className={styles.verticalFlexbox}>
+                                            <div>Upload RNA-seq profiles from the cells that you wish to target and remove</div>
+                                            <input
+                                                style={{ display: "none" }}
+                                                id="fileUpload"
+                                                type="file"
+                                                onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]) }}
+                                            />
+                                            <label htmlFor="fileUpload">
+                                                <Button variant="contained" color="secondary" component="span">
+                                                    Upload File
+                                                </Button>
+                                            </label>
+                                            <div className={styles.horizontalFlexbox}>
+                                                <Button onClick={() => setUseDefaultFile(true)} className={styles.darkOnHover} variant="text" color="secondary">
+                                                    Load example file
+                                                </Button>
+                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
+                                                    <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
+                                                        Download example file
+                                                    </Button>
+                                                </a>
+                                            </div>
+                                            <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
+                                                File specifications
+                                            </Button>
+                                            <Popover
+                                                open={Boolean(anchorEl)}
+                                                anchorEl={anchorEl}
+                                                onClose={() => { setAnchorEl(null) }}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <TableContainer component={Paper}>
+                                                    <Typography
+                                                        sx={{ textAlign: 'center' }}
+                                                        variant="h6"
+                                                    >
+                                                        File should be a tsv/csv of the following form:
+                                                    </Typography>
+                                                    <Table sx={{ width: 500 }} size="small">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell></TableCell>
+                                                                <TableCell align="right"><b>Replicate 1</b></TableCell>
+                                                                <TableCell align="right"><b>Replicate 2</b></TableCell>
+                                                                <TableCell align="right"><b>...</b></TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {rows.map((row) => (
+                                                                <TableRow key={row.name}>
+                                                                    <TableCell><b>{row.name}</b></TableCell>
+                                                                    <TableCell align="right">{row.rep1}</TableCell>
+                                                                    <TableCell align="right">{row.rep2}</TableCell>
+                                                                    <TableCell align="right">{row.rep3}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </TableContainer>
+                                            </Popover>
+
+                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null) }} variant="outlined" component="span" color="secondary">
+                                                Clear Chosen File
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div>Chosen file:</div>
+                                    <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
+
+                                </div>
+
+                                <div style={{ alignItems: 'flex-start' }} className={styles.verticalFlexbox}>
+
+                                </div>
+
+                                <div className={styles.verticalFlexbox}>
+
+                                    <div className={styles.verticalFlexbox}>
+                                        <div>Normal tissue background:</div>
+
+                                        <div className={styles.horizontalFlexbox}>
+                                            <Box sx={{ width: 390 }}>
+                                                <FormControl fullWidth>
+                                                    <Select
+                                                        color="secondary"
+                                                        value={precomputedBackground}
+                                                        onChange={(event) => setPrecomputedBackground(event.target.value)}
+                                                    >
+                                                        <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq)</MenuItem>
+                                                        <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq)</MenuItem>
+                                                        <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq)</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Box>
+                                        </div>
+                                    </div>
+                                    <div className={styles.horizontalFlexbox}>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={membraneGenes}
+                                            exclusive
+                                            onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue) }}
+                                        >
+                                            <ToggleButton value={true}>Yes</ToggleButton>
+                                            <ToggleButton value={false}>No</ToggleButton>
+                                        </ToggleButtonGroup>
+                                        <div>Prioritize membrane genes</div>
                                     </div>
                                 </div>
-                                <div className={styles.horizontalFlexbox}>
-                                    <ToggleButtonGroup
-                                        color="secondary"
-                                        value={membraneGenes}
-                                        exclusive
-                                        onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue) }}
-                                    >
-                                        <ToggleButton value={true}>Yes</ToggleButton>
-                                        <ToggleButton value={false}>No</ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <div>Prioritize membrane genes</div>
-                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                    <CardActions style={{ justifyContent: 'center' }}>
-                        <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large'onClick={submitTest}>Submit</Button>
-                    </CardActions>
-                </Card>
-                <>
-                {alert}
-                </>
+                        </CardContent>
+                        <CardActions style={{ justifyContent: 'center' }}>
+                            <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitTest}>Submit</Button>
+                        </CardActions>
+                    </Card>
+                    <>
+                        {alert}
+                    </>
                 </div>
                 <Footer />
             </div>

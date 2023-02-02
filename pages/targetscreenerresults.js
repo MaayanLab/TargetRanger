@@ -80,8 +80,8 @@ export default function Results() {
 
           <Header />
           <div className={styles.textDiv}>
-            <h2>Target Screener Results</h2>
-            <p>This pipeline uses RNA-seq expression data for a tumor and identifies over-expressed proteins verses a baseline dataset of normal tissues such those in GTEx or ARCHS4 using the Welch's t-test. It then prioritizes candidates by significance and targetability.</p>
+            <h2>TargetRanger Results</h2>
+            <p>The TargetRanger pipeline compares the RNA-seq expression data you uploaded to basal expression data from normal tissues and cell types to identifies genes that are highly-expressed in the input compared to the normal baseline using Welch's T-test. You can filter the ranked candidates by membrane or secretome only.</p>
           </div>
 
           <div className={styles.horizontalFlexbox}>
@@ -105,7 +105,7 @@ export default function Results() {
           </div>
           <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} />
           <div className={styles.textDiv}>
-            <p>Visualize genes identified in the table above across databases either by selecting the desired row or searching for the gene below:</p>
+            <p>View a box plot for each identified target gene in the table by clicking on the table row, or by selecting the gene from the dropdown box below:</p>
           </div>
           <div style={{ marginBottom: '15px' }}>
             <Autocomplete
@@ -137,7 +137,7 @@ export default function Results() {
             <Header />
             <p>Error: No results found</p>
             <p>Please try resubmitting your data</p>
-            <Button variant="contained" color="secondary" href="targetscreener">Target Screener</Button>
+            <Button variant="contained" color="secondary" href="targetscreener">TargetRanger Upload</Button>
             <Footer />
           </div>
         </div>

@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-end;
     gap: 15px;
-    padding-bottom: 150px;
+    padding-bottom: 10%;
     font-size: 18px;
   }
   
@@ -18,7 +19,7 @@
   .rowFlexbox {
     display: flex;
     /* flex-wrap: wrap; */
-    align-items: center;
+    align-items:flex-start;
     gap: 25px;
     margin-top: auto;
   }
