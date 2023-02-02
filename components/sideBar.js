@@ -92,7 +92,7 @@ export default function SideBar(props) {
                             <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                                 <div>
-                                <Accordion defaultExpanded={true} style={{ backgroundColor: '#af8aba', width: '94%', boxShadow: 'none', textAlign: 'center'}}>
+                                <Accordion defaultExpanded={true} style={{ backgroundColor: '#cea6dc', width: '94%', boxShadow: 'none', textAlign: 'center'}}>
                                     <AccordionSummary
                                         expandIcon={<ArrowDropDownIcon />}>
                                         <h3 style={{ margin: '0', padding: '4', textAlign: 'center'}}>Precomputed Backgrounds</h3>
@@ -160,7 +160,7 @@ export default function SideBar(props) {
 
                                 
 
-                                <Accordion style={{ backgroundColor: '#af8aba', width: '94%', boxShadow: 'none', textAlign: 'center'}}>
+                                <Accordion style={{ backgroundColor: '#cea6dc', width: '94%', boxShadow: 'none', textAlign: 'center'}}>
                                     <AccordionSummary
                                         expandIcon={<ArrowDropDownIcon />}
                                         >
@@ -214,5 +214,6 @@ export default function SideBar(props) {
                         </Box>
                 </div>
             </div>
+
     )
 }

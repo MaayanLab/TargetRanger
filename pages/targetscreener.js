@@ -229,17 +229,17 @@ export default function Page() {
                 </div>
                 
                 <Card>
-                    <h1 style={{ textAlign: 'center', gap: '50px' }}>Target Screener</h1>
                     <CardContent>
                         <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
 
                             <div className={styles.verticalFlexbox}>
 
-                                <div>Tumor RNA-seq expression vectors</div>
+                                
 
                                 <div className={styles.horizontalFlexbox}>
 
                                     <div className={styles.verticalFlexbox}>
+                                    <div>Upload RNA-seq profiles from the cells that you wish to target and remove</div>
                                         <input
                                             style={{ display: "none" }}
                                             id="fileUpload"
