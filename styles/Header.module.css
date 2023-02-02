@@ -86,6 +86,7 @@
     /* flex-wrap: wrap; */
     align-items: center;
     gap: 25px;
+    font-size: 18px;
   }
 
 .verticalFlexbox {
@@ -96,6 +97,7 @@
     /* flex-wrap: wrap; */
     align-items: center;
     width: 100%;
+    font-size: 18px;
 }
 
 .text {
