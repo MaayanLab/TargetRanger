@@ -374,12 +374,11 @@ export default function Page() {
                         <CardActions style={{ justifyContent: 'center' }}>
                             <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitTest}>Submit</Button>
                         </CardActions>
-                    </Card>
-                    <>
+                        <>
                         {alert}
-                    </>
+                        </>
+                    </Card>
                 </div>
-
                 <Footer />
             </div>
         </div>
