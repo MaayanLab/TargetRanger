@@ -46,6 +46,7 @@ export default function Page() {
     const [alert, setAlert] = React.useState('')
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
+    const [secretedGenes, setSecretedGenes] = React.useState(false);
 
     const [precomputedBackground, setPrecomputedBackground] = React.useState(0);
 
@@ -80,6 +81,7 @@ export default function Page() {
                 res: JSON.stringify(json),
                 ogfile: JSON.stringify(targetStats),
                 membraneGenes: membraneGenes,
+                secretedGenes: secretedGenes,
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -228,7 +230,7 @@ export default function Page() {
                         </Drawer>
                     </div>
 
-                    <Card>
+                    <Card >
                         <CardContent>
                             <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
 
@@ -342,17 +344,29 @@ export default function Page() {
                                             </Box>
                                         </div>
                                     </div>
-                                    <div className={styles.horizontalFlexbox}>
+                                    <div className={styles.horizontalFlexbox} style={{justifyItems: 'left'}}>
                                         <ToggleButtonGroup
                                             color="secondary"
                                             value={membraneGenes}
                                             exclusive
-                                            onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue) }}
+                                            onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue); if (newValue) setSecretedGenes(false)}}
                                         >
                                             <ToggleButton value={true}>Yes</ToggleButton>
                                             <ToggleButton value={false}>No</ToggleButton>
                                         </ToggleButtonGroup>
                                         <div>Prioritize membrane genes</div>
+                                    </div>
+                                    <div className={styles.horizontalFlexbox} style={{justifyContent: 'left'}}>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={secretedGenes}
+                                            exclusive
+                                            onChange={(event, newValue) => { if (newValue !== null) setSecretedGenes(newValue);  if (newValue) setMembraneGenes(false)}}
+                                        >
+                                            <ToggleButton value={true}>Yes</ToggleButton>
+                                            <ToggleButton value={false}>No</ToggleButton>
+                                        </ToggleButtonGroup>
+                                        <div>Prioritize secreted genes</div>
                                     </div>
                                 </div>
                             </div>
@@ -365,6 +379,7 @@ export default function Page() {
                         {alert}
                     </>
                 </div>
+
                 <Footer />
             </div>
         </div>

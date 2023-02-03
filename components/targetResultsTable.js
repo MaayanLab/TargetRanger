@@ -1,6 +1,7 @@
 import * as React from "react";
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from "@mui/x-data-grid";
 import membrane_protiens from '../public/files/membrane_protiens.json';
+import secreted from '../public/files/secretome.json';
 import styles from '../styles/TargetScreener.module.css';
 import { useState } from "react";
 import { Button, Image, Tooltip } from "@mui/material";
@@ -20,6 +21,7 @@ export default function TargetResultTable(props) {
         { field: "p", headerName: "P-value", type: "number", flex: 1, minWidth: 200 },
         { field: "log2fc", headerName: "log2 Fold Change", type: "number", flex: 1, minWidth: 160},
         { field: "membrane", headerName: "Membrane Protien", type: "number", flex: 1, minWidth: 150},
+        { field: "secreted", headerName: "Secreted Protien", type: "number", flex: 1, minWidth: 150},
         {
             field: "action",
             headerName: "Links",
@@ -81,6 +83,7 @@ export default function TargetResultTable(props) {
     for (let i =0; i < results.length; i++) {
         results[i]['id'] = results[i]['gene']
         results[i]['membrane'] = membrane_protiens.includes(results[i]['gene'])
+        results[i]['secreted'] = secreted.includes(results[i]['gene'])
         results[i]['t'] = Number(results[i]['t']).toFixed(2)
         var pval = results[i]['p']
         if (pval < .001) {

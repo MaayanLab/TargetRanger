@@ -14,7 +14,6 @@ import { useRouter } from 'next/router';
 
 
 
-
 export default function Results() {
   // Recieve results and relevant gene stats from user submission
   const router = useRouter()
@@ -31,8 +30,13 @@ export default function Results() {
     // Set state of membrane gene filter based on submission page
     const [membraneGenes, setMembraneGenes] = React.useState(JSON.parse(router.query['membraneGenes']));
 
+    // Set state of membrane gene filter based on submission page
+    const [secretedGenes, setSecretedGenes] = React.useState(JSON.parse(router.query['secretedGenes']));
+
     // Setup possible filters
     const filtMembranes = {items: [{ columnField: "membrane", operatorValue: "=", value: "1" }]};
+    const filtSecreted = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }]};
+    const filtCombined = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }, { columnField: "membrane", operatorValue: "=", value: "1" }]};
     const filtEmpty = { items: [{ columnField: "t", operatorValue: ">", value: "0" }] }
 
 
@@ -70,6 +74,19 @@ export default function Results() {
     }, [gene])
 
 
+    useEffect(() => {
+      // fetch data for given gene
+    if (membraneGenes) {
+        setFilt(filtMembranes)
+      } else if (secretedGenes) {
+        setFilt (filtSecreted)
+      } else {
+        setFilt(filtEmpty)
+      }
+
+    }, [membraneGenes, secretedGenes])
+
+
     return (
 
       <div style={{ position: 'relative', minHeight: '100vh' }}>
@@ -90,14 +107,17 @@ export default function Results() {
               color="secondary"
               value={membraneGenes}
               exclusive
-              onChange={(event, newValue) => {
-                if (newValue !== null) {
-                  setMembraneGenes(!membraneGenes)
-                  if (membraneGenes) {
-                    setFilt(filtEmpty)
-                  } else setFilt(filtMembranes)
-                }
-              }}
+              onChange={(event, newValue) => {if (newValue !== null) setMembraneGenes(newValue); if (newValue) setSecretedGenes(false)}}
+            >
+              <ToggleButton value={true}>YES</ToggleButton>
+              <ToggleButton value={false}>NO</ToggleButton>
+            </ToggleButtonGroup>
+            <div style={{ width: '250px' }}>Prioritize secreted genes:</div>
+            <ToggleButtonGroup
+              color="secondary"
+              value={secretedGenes}
+              exclusive
+              onChange={(event, newValue) => {if (newValue !== null) setSecretedGenes(newValue); if (newValue) setMembraneGenes(false)}}
             >
               <ToggleButton value={true}>YES</ToggleButton>
               <ToggleButton value={false}>NO</ToggleButton>
