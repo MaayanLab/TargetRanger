@@ -11,6 +11,8 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Name | quote }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Release.Name }}-db
@@ -26,10 +28,15 @@ spec:
         envFrom:
         - secretRef:
             name: {{ .Release.Name }}-db
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
 {{- if .Values.database.persistence }}
         volumeMounts:
           - name: postgres-data
-            mountPath: /var/lib/postgresql
+            mountPath: /var/lib/postgresql/data
+            subPath: data
 {{- end }}
 {{- if .Values.database.persistence }}
       volumes:
@@ -73,6 +80,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteOnce
+  volumeMode: Filesystem
   storageClassName: {{ .Values.database.persistence.storageClassName }}
   resources:
     requests:
