@@ -44,6 +44,33 @@ spec:
           value: {{ .Values.generangerUrl }}
         - name: NEXT_PUBLIC_TARGETRANGERURL
           value: https://{{ .Values.ingress.host }}
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: '1'
+            memory: 4Gi
+          requests:
+            cpu: 500m
+            memory: 2Gi
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 5
+          successThreshold: 2
+          tcpSocket:
+            port: 3000
+          timeoutSeconds: 5
+        livenessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 150
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 3000
+          timeoutSeconds: 5
       restartPolicy: Always
 ---
 apiVersion: v1
