@@ -1,0 +1,21 @@
+generangerUrl: https://generanger.maayanlab.cloud/gene/A2M?database=ARCHS4
+downloads: https://generanger.s3.amazonaws.com/
+# image: maayanlab/targetranger
+# version: 0.3.0
+
+database:
+  # create: false
+  # DATABASE_URL: 
+  create: true
+  image: maayanlab/postgres-py:14.4
+  persistence:
+    storageClassName: gp2
+    size: 10Gi
+ingress:
+  create: true
+  className: nginx
+  host: targetranger.maayanlab.cloud
+  secretName: targetranger-maayanlab-cloud-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: 'true'

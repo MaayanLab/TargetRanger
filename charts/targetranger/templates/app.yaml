@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-app
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: {{ .Release.Name | quote }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-app
+        app.kubernetes.io/version: {{ .Chart.Version | quote }}
+        app.kubernetes.io/managed-by: helm
+        app.kubernetes.io/component: server
+        app.kubernetes.io/part-of: {{ .Release.Name | quote }}
+    spec:
+      containers:
+      - name: targetranger
+        image: {{ .Values.image | default (printf "maayanlab/targetranger:%s" .Chart.Version) }}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DATABASE_URL
+{{- if (.Values.database | default dict).create }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db
+              key: DATABASE_URL
+{{- else }}
+          value: {{ .Values.database.DATABASE_URL }}
+{{- end }}
+        - name: NEXT_PUBLIC_DOWNLOADS
+          value: {{ .Values.downloads }}
+        - name: NEXT_PUBLIC_ENTRYPOINT
+          value: ''
+        - name: NEXT_PUBLIC_GENERANGERURL
+          value: {{ .Values.generangerUrl }}
+        - name: NEXT_PUBLIC_TARGETRANGERURL
+          value: https://{{ .Values.ingress.host }}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-app
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: {{ .Release.Name | quote }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app.kubernetes.io/name: {{ .Release.Name }}-app
+{{- if (.Values.ingress | default dict).create }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-app
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: {{ .Release.Name | quote }}
+  annotations: {{ (.Values.ingress.annotations | default dict) | toJson }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Release.Name }}-app
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ .Values.ingress.secretName }}
+{{- end }}
