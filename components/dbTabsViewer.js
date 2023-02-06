@@ -26,7 +26,7 @@ export default function DbTabsViewer(props) {
     var gene_data = {
         type: 'box',
         mean: [geneStats[gene]['mean']],
-        std: [geneStats[gene]['std']],
+        sd: [geneStats[gene]['std']],
         y: ['Expression in submitted file'],
         lowerfence: [null],
         upperfence: [null],
@@ -34,6 +34,7 @@ export default function DbTabsViewer(props) {
         median: [geneStats[gene]['mean']],
         q3: [geneStats[gene]['mean'] + geneStats[gene]['std']],
         orientation: 'h',
+        hoverinfo: 'skip',
     }
 
     function TabPanel(props) {
