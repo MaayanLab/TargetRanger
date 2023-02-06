@@ -6,8 +6,8 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/targetscreener',
+        source: '/targetscreener',
+        destination: '/',
         permanent: false,
       },
     ]
