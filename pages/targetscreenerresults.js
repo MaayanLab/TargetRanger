@@ -12,6 +12,13 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useRouter } from 'next/router';
 import { useRuntimeConfig } from '../components/runtimeConfig';
+import { useCallback } from 'react';
+
+
+// Setup possible filters
+const filtMembranes = {items: [{ columnField: "membrane", operatorValue: "=", value: "1" }]};
+const filtSecreted = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }]};
+const filtEmpty = { items: [{ columnField: "t", operatorValue: ">", value: "0" }] }
 
 
 
@@ -21,73 +28,87 @@ export default function Results() {
   const runtimeConfig = useRuntimeConfig()
   const string_res = router.query['res']
   const string_stats = router.query['ogfile']
+  // Set state of membrane gene filter based on submission page
+  var initMembraneVal;
+  var initSecretedVal;
+  var results;
 
-  // Try to display results --> on reload direct them back to the Target Screener page
   try {
-    // Get results list of differentially expressed genes and create array for autocomplete
-    const results = JSON.parse(string_res)
-    const geneList = results.map(x => x.gene)
+    initMembraneVal = JSON.parse(router.query['membraneGenes']);
+    initSecretedVal = JSON.parse(router.query['secretedGenes']);
+    results = JSON.parse(string_res);
+  } catch {
+    initMembraneVal = false;
+    initSecretedVal = false;
+    results = null;
+  }
+  const [membraneGenes, setMembraneGenes] = React.useState(initMembraneVal);
+
+  // Set state of membrane gene filter based on submission page
+  const [secretedGenes, setSecretedGenes] = React.useState(initSecretedVal);
+
+  var initFilt;
+  if (membraneGenes) {
+    initFilt = filtMembranes
+  } else if (secretedGenes) {
+    initFilt = filtSecreted
+  } else initFilt = filtEmpty
+
+  const [filt, setFilt] = useState(initFilt)
+  
+  const [database, setDatabase] = useState(0)
+  const [tabsData, setTabsData] = useState({ sorted_data: {}, NCBI_data: '' })
+
+  // Get results list of differentially expressed genes and create array for autocomplete
+
+  var geneList;
+  if (!results) {
+    geneList = ['']
+  } else {
+    geneList = results.map(x => x.gene)
+  }
+  const [gene, setGene] = useState(geneList[0])
 
 
-    // Set state of membrane gene filter based on submission page
-    const [membraneGenes, setMembraneGenes] = React.useState(JSON.parse(router.query['membraneGenes']));
+  const fetchData = useCallback(async () => {
+    let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 'gene': gene })
+    })
+    const json = await res.json()
+    setTabsData(json)
+  }, [runtimeConfig, gene, setTabsData]);
 
-    // Set state of membrane gene filter based on submission page
-    const [secretedGenes, setSecretedGenes] = React.useState(JSON.parse(router.query['secretedGenes']));
+  useEffect(() => {
+    // fetch data for given gene
+    
 
-    // Setup possible filters
-    const filtMembranes = {items: [{ columnField: "membrane", operatorValue: "=", value: "1" }]};
-    const filtSecreted = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }]};
-    const filtCombined = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }, { columnField: "membrane", operatorValue: "=", value: "1" }]};
-    const filtEmpty = { items: [{ columnField: "t", operatorValue: ">", value: "0" }] }
+    // call the function
+    fetchData()
+      // make sure to catch any error
+      .catch(console.error);
+  }, [gene, runtimeConfig, fetchData])
 
 
-    // Use membraneGene state to determine filter
-    var initFilt;
-    if (membraneGenes) {
-      initFilt = filtMembranes
+  useEffect(() => {
+    // fetch data for given gene
+  if (membraneGenes) {
+      setFilt(filtMembranes)
+    } else if (secretedGenes) {
+      setFilt (filtSecreted)
     } else {
-      initFilt = filtEmpty
+      setFilt(filtEmpty)
     }
 
-    const [filt, setFilt] = useState(initFilt)
-    const [gene, setGene] = useState(geneList[0])
-    const [database, setDatabase] = useState(0)
-    const [tabsData, setTabsData] = useState({ sorted_data: {}, NCBI_data: '' })
+  }, [membraneGenes, secretedGenes])
 
-    useEffect(() => {
-      // fetch data for given gene
-      const fetchData = async () => {
-        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 'gene': gene })
-        })
-        const json = await res.json()
-        setTabsData(json)
-      }
-
-      // call the function
-      fetchData()
-        // make sure to catch any error
-        .catch(console.error);
-    }, [gene, runtimeConfig])
-
-
-    useEffect(() => {
-      // fetch data for given gene
-    if (membraneGenes) {
-        setFilt(filtMembranes)
-      } else if (secretedGenes) {
-        setFilt (filtSecreted)
-      } else {
-        setFilt(filtEmpty)
-      }
-
-    }, [membraneGenes, secretedGenes])
-
+  // Try to display results --> on reload direct them back to the Target Screener page
+  if (results) {
+    // Use membraneGene state to determine filter
+    
 
     return (
 
@@ -100,7 +121,7 @@ export default function Results() {
           <Header />
           <div className={styles.textDiv}>
             <h2>TargetRanger Results</h2>
-            <p>The TargetRanger pipeline compares the RNA-seq expression data you uploaded to basal expression data from normal tissues and cell types to identifies genes that are highly-expressed in the input compared to the normal baseline using Welch's T-test. You can filter the ranked candidates by membrane or secretome only.</p>
+            <p>The TargetRanger pipeline compares the RNA-seq expression data you uploaded to basal expression data from normal tissues and cell types to identifies genes that are highly-expressed in the input compared to the normal baseline using Welch&apos;s T-test. You can filter the ranked candidates by membrane or secretome only.</p>
           </div>
 
           <div className={styles.horizontalFlexbox}>
@@ -148,7 +169,7 @@ export default function Results() {
         </div>
       </div>
     )
-  } catch {
+  } else {
     return (
       <>
         <div style={{ position: 'relative', minHeight: '100vh' }}>
