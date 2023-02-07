@@ -28,15 +28,42 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import DownloadIcon from '@mui/icons-material/Download';
 import Popover from '@mui/material/Popover';
 import exampleData from '../public/files/GSE49155.json';
+import exampleCounts from '../public/files/GSE49155-counts.json';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
 import { Drawer } from '@mui/material';
+import { useRuntimeConfig } from '../components/runtimeConfig';
+import { useCallback } from 'react';
+
+
+function stddev(arr) {
+    // Creating the mean with Array.reduce
+    let mean = arr.reduce((acc, curr) => {
+        return acc + parseFloat(curr)
+    }, 0) / arr.length
+
+    // Assigning (value - mean) ^ 2 to every array item
+    arr = arr.map((k) => {
+        return (k - mean) ** 2
+    })
+
+    // Calculating the sum of updated array
+    let sum = arr.reduce((acc, curr) => acc + curr, 0);
+
+    // Calculating the variance
+    let variance = sum / arr.length
+
+    let std = Math.sqrt(variance)
+    // Returning the standard deviation
+    return [mean, std]
+}
 
 
 export default function Page() {
+    const runtimeConfig = useRuntimeConfig()
 
     // For MUI loading icon
 
@@ -58,9 +85,10 @@ export default function Page() {
 
     const router = useRouter();
 
-    async function submitGeneStats(fileStats) {
 
-        let res = await fetch(`${process.env.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
+    const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
+
+        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,7 +100,7 @@ export default function Page() {
         const genesIncluded = Object.keys(fileStats['genes'])
         var targetStats = {}
         for (let i = 0; i < genes.length; i++) {
-            if (genesIncluded.includes(genes[i])) targetStats[genes[i]] = fileStats['genes'][genes[i]]
+            if (genesIncluded.includes(genes[i])) targetStats[genes[i]] = geneCounts[genes[i]]
         }
 
         let href = {
@@ -90,37 +118,15 @@ export default function Page() {
             setLoading(false)
             alert('Error with returned data')
         })
-    }
+    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router])
 
 
-    function stddev(arr) {
-        // Creating the mean with Array.reduce
-        let mean = arr.reduce((acc, curr) => {
-            return acc + parseFloat(curr)
-        }, 0) / arr.length
-
-        // Assigning (value - mean) ^ 2 to every array item
-        arr = arr.map((k) => {
-            return (k - mean) ** 2
-        })
-
-        // Calculating the sum of updated array
-        let sum = arr.reduce((acc, curr) => acc + curr, 0);
-
-        // Calculating the variance
-        let variance = sum / arr.length
-
-        let std = Math.sqrt(variance)
-        // Returning the standard deviation
-        return [mean, std]
-    }
-
-    let fileReader;
-
-    var geneStats;
-
-    const handleFileRead = (e) => {
+    const handleFileRead =  useCallback((e) => {
+        let fileReader;
+        var geneStats;
+        var geneCounts;
         const content = fileReader.result;
+
         var rows = content.split('\n')
         if (rows[1].includes(',')) {
             rows = rows.map(row => row.split(','))
@@ -128,6 +134,7 @@ export default function Page() {
             rows = rows.map(row => row.split('\t'))
         }
         var n = rows[0].length - 1
+        geneCounts = {}
         geneStats = {}
         var gene;
         var data;
@@ -136,28 +143,27 @@ export default function Page() {
             gene = rows[i].slice(0, 1)
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
-            if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0)) {
-                if (gene != '') geneStats[gene] = { 'std': stats[1], 'mean': stats[0] }
+            if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
+                geneStats[gene] = { 'std': stats[1], 'mean': stats[0]}
+                geneCounts[gene] = data.map(x => parseInt(x))
             }
         }
-        const fileStats = { 'genes': geneStats, 'n': n }
-        submitGeneStats(fileStats)
-    };
+        submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
+    }, [submitGeneStats]);
 
-    const handleFileChosen = (file) => {
+    const handleFileChosen = useCallback((file) => {
         fileReader = new FileReader();
         fileReader.onloadend = handleFileRead;
         fileReader.readAsText(file);
-    };
+    }, [handleFileRead]);
 
 
-    async function submitTest() {
+    const submitTest = useCallback(() => {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
 
-                submitGeneStats(exampleData)
-
+                submitGeneStats(exampleData, exampleCounts)
             } else {
 
                 setLoading(true);
@@ -169,18 +175,13 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }
+    }, [file, handleFileChosen, submitGeneStats, useDefaultFile]);
 
     // For input file example table
-
-    function createData(name, rep1, rep2, rep3) {
-        return { name, rep1, rep2, rep3 };
-    }
-
     const rows = [
-        createData('Gene Symbol', 0, 200, '...'),
-        createData('Gene Symbol', 5, 180, '...'),
-        createData('...', '...', '...', '...')
+        {name: 'Gene Symbol', rep1: 0, rep2: 200, rep3: '...'},
+        {name: 'Gene Symbol', rep1: 50, rep2: 89, rep3: '...'},
+        {name: 'Gene Symbol', rep1: '...', rep2: '...', rep3: '...'},
     ];
 
     // For MUI Popover
@@ -382,6 +383,5 @@ export default function Page() {
                 <Footer />
             </div>
         </div>
-
     )
 }
