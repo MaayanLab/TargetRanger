@@ -5,10 +5,13 @@ import secreted from '../public/files/secretome.json';
 import styles from '../styles/TargetScreener.module.css';
 import { useState } from "react";
 import { Button, Image, Tooltip } from "@mui/material";
+import { useRuntimeConfig } from "./runtimeConfig";
 
 
 
 export default function TargetResultTable(props) {
+    const runtimeConfig = useRuntimeConfig()
+
     var results = JSON.parse(props.results);
     const membraneGenes = JSON.parse(props.membraneGenes);
     const filt = props.filt;
@@ -54,16 +57,16 @@ export default function TargetResultTable(props) {
               return (
                 <div className={styles.horizontalFlexbox} style={{gap: '0px', padding: '0px'}}>
                     <Tooltip title="Open in ARCHS4">
-                        <Button onClick={onClickARCHS4}><img style={{width: '40px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px'}} src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} alt="archs4 Logo"/></Button>
+                        <Button onClick={onClickARCHS4}><img style={{width: '40px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} alt="archs4 Logo"/></Button>
                     </Tooltip>
                     <Tooltip title="Open in Harmonizome">
-                        <Button onClick={onClickHARMONIZOME}><img style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/harmonizomelogo.png"} alt="archs4 Logo"/></Button>
+                        <Button onClick={onClickHARMONIZOME}><img style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/harmonizomelogo.png"} alt="archs4 Logo"/></Button>
                     </Tooltip>
                     <Tooltip title="Open in PrismEXP">
-                        <Button onClick={onClickPrismEXP}><img sx={{m: 1}} style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/PrismEXP.png"} alt="archs4 Logo"/></Button>
+                        <Button onClick={onClickPrismEXP}><img sx={{m: 1}} style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/PrismEXP.png"} alt="archs4 Logo"/></Button>
                     </Tooltip>
                     <Tooltip title="Open in GDLPA">
-                        <Button onClick={onClickGDLPA}><img sx={{m: 1}} style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/GDLPA.png"} alt="archs4 Logo"/></Button>
+                        <Button onClick={onClickGDLPA}><img sx={{m: 1}} style={{width: '23px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GDLPA.png"} alt="archs4 Logo"/></Button>
                     </Tooltip>
                 </div>
               )

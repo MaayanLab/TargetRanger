@@ -11,12 +11,14 @@ import DbTabsViewer from '../components/dbTabsViewer';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useRouter } from 'next/router';
+import { useRuntimeConfig } from '../components/runtimeConfig';
 
 
 
 export default function Results() {
   // Recieve results and relevant gene stats from user submission
   const router = useRouter()
+  const runtimeConfig = useRuntimeConfig()
   const string_res = router.query['res']
   const string_stats = router.query['ogfile']
 
@@ -56,7 +58,7 @@ export default function Results() {
     useEffect(() => {
       // fetch data for given gene
       const fetchData = async () => {
-        let res = await fetch(`${process.env.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
+        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -71,7 +73,7 @@ export default function Results() {
       fetchData()
         // make sure to catch any error
         .catch(console.error);
-    }, [gene])
+    }, [gene, runtimeConfig])
 
 
     useEffect(() => {

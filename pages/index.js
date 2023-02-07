@@ -34,9 +34,11 @@ import CardContent from '@mui/material/CardContent';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
 import { Drawer } from '@mui/material';
+import { useRuntimeConfig } from '../components/runtimeConfig';
 
 
 export default function Page() {
+    const runtimeConfig = useRuntimeConfig()
 
     // For MUI loading icon
 
@@ -60,7 +62,7 @@ export default function Page() {
 
     async function submitGeneStats(fileStats) {
 
-        let res = await fetch(`${process.env.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
+        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

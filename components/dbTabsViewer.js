@@ -8,6 +8,7 @@ import styles from '../styles/Main.module.css';
 import PropTypes from 'prop-types';
 import { Container} from '@mui/material';
 import dynamic from 'next/dynamic';
+import { useRuntimeConfig } from "./runtimeConfig";
 
 
 const Plot = dynamic(() => import('react-plotly.js'), {
@@ -16,6 +17,7 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 
 
 export default function DbTabsViewer(props) {
+    const runtimeConfig = useRuntimeConfig()
     var database = props.database
     var setDatabase = props.setdatabase
     var result = props.result
@@ -151,58 +153,58 @@ export default function DbTabsViewer(props) {
                     {
                         (database == 0)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="ARCHS4 logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="ARCHS4 logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="ARCHS4 logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="ARCHS4 logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} />} />
                     }
                     {
                         (database == 1)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="GTEx logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="GTEx logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="GTEx logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="GTEx logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} />} />
                     }
                     {
                         (database == 2)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="Tabula Sapiens logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="Tabula Sapiens logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="Tabula Sapiens logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="Tabula Sapiens logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} />} />
                     }
                     {
                         (database == 3)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="CCLE logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="CCLE logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="CCLE logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="CCLE logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} />} />
                     }
                     {
                         (database == 4)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="HPM logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/HPM.gif"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="HPM logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPM.gif"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="HPM logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/HPM.gif"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="HPM logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPM.gif"} />} />
                     }
                     {
                         (database == 5)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="HPA logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/HPA.svg"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="HPA logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPA.svg"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="HPA logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/HPA.svg"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="HPA logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPA.svg"} />} />
                     }
                     {
                         (database == 6)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="GTEx logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_proteomics.png"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="GTEx logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_proteomics.png"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="GTEx logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_proteomics.png"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="GTEx logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_proteomics.png"} />} />
                     }
                     {
                         (database == 7)
                             ?
-                            <Tab icon={<img className={styles.tabLogo} alt="CCLE logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_proteomics.jpeg"} />} />
+                            <Tab icon={<img className={styles.tabLogo} alt="CCLE logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_proteomics.jpeg"} />} />
                             :
-                            <Tab icon={<img className={styles.grayTabLogo} alt="CCLE logo" src={process.env.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_proteomics.jpeg"} />} />
+                            <Tab icon={<img className={styles.grayTabLogo} alt="CCLE logo" src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_proteomics.jpeg"} />} />
                     }
                 </Tabs>
             </Box>
