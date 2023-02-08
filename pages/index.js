@@ -85,6 +85,8 @@ export default function Page() {
 
     const router = useRouter();
 
+    var fileReader;
+
 
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
@@ -122,7 +124,7 @@ export default function Page() {
 
 
     const handleFileRead =  useCallback((e) => {
-        let fileReader;
+       
         var geneStats;
         var geneCounts;
         const content = fileReader.result;
@@ -149,7 +151,7 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats]);
+    }, [submitGeneStats, fileReader]);
 
     const handleFileChosen = useCallback((file) => {
         fileReader = new FileReader();
