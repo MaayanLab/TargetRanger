@@ -1,7 +1,7 @@
 generangerUrl: https://generanger.maayanlab.cloud/gene/A2M?database=ARCHS4
 downloads: https://generanger.s3.amazonaws.com/
 # image: maayanlab/targetranger
-# version: 0.3.0
+# version: 0.3.1
 
 database:
   # create: false
