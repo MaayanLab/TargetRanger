@@ -50,14 +50,13 @@ spec:
           protocol: TCP
         resources:
           limits:
-            cpu: '1'
-            memory: 4Gi
+            cpu: 250m
+            memory: 1Gi
           requests:
-            cpu: 500m
-            memory: 2Gi
+            cpu: 100m
+            memory: 512Mi
         readinessProbe:
           failureThreshold: 3
-          initialDelaySeconds: 120
           periodSeconds: 5
           successThreshold: 2
           tcpSocket:
@@ -65,7 +64,6 @@ spec:
           timeoutSeconds: 5
         livenessProbe:
           failureThreshold: 10
-          initialDelaySeconds: 150
           periodSeconds: 5
           successThreshold: 1
           tcpSocket:
