@@ -6,6 +6,9 @@ import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
 import SideBar from '../components/sideBar';
+import exampleData from '../public/files/GSE49155.json';
+import exampleCounts from '../public/files/GSE49155-counts.json';
+import conversionDict from '../public/files/conversion_dict.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -27,8 +30,6 @@ import Typography from '@mui/material/Typography';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import DownloadIcon from '@mui/icons-material/Download';
 import Popover from '@mui/material/Popover';
-import exampleData from '../public/files/GSE49155.json';
-import exampleCounts from '../public/files/GSE49155-counts.json';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -146,8 +147,9 @@ export default function Page() {
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                geneStats[gene] = { 'std': stats[1], 'mean': stats[0]}
-                geneCounts[gene] = data.map(x => parseInt(x))
+                var convertedSymbol = conversionDict[gene];
+                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0]};
+                geneCounts[convertedSymbol] = data.map(x => parseInt(x));
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
@@ -181,9 +183,9 @@ export default function Page() {
 
     // For input file example table
     const rows = [
-        {name: 'Gene Symbol', rep1: 0, rep2: 200, rep3: '...'},
-        {name: 'Gene Symbol', rep1: 50, rep2: 89, rep3: '...'},
-        {name: 'Gene Symbol', rep1: '...', rep2: '...', rep3: '...'},
+        {name: 'Gene Symbol/Ensembl ID', rep1: 0, rep2: 200, rep3: '...'},
+        {name: 'Gene Symbol/Ensembl ID', rep1: 50, rep2: 89, rep3: '...'},
+        {name: 'Gene Symbol/Ensembl ID', rep1: '...', rep2: '...', rep3: '...'},
     ];
 
     // For MUI Popover
