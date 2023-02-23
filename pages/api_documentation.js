@@ -17,7 +17,7 @@ export async function getStaticProps() {
       definition: {
         openapi: '3.0.0',
         info: {
-          title: 'GeneRanger API',
+          title: 'TargetRanger API',
           version: '1.0',
         },
       },
