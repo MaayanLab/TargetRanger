@@ -147,6 +147,9 @@ export default function Page() {
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
+                if (gene.contains('.')) {
+                    gene = gene.split('.')[0]
+                }
                 var convertedSymbol = conversionDict[gene];
                 geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0]};
                 geneCounts[convertedSymbol] = data.map(x => parseInt(x));
