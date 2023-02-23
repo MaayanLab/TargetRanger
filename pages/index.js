@@ -9,6 +9,7 @@ import SideBar from '../components/sideBar';
 import exampleData from '../public/files/GSE49155.json';
 import exampleCounts from '../public/files/GSE49155-counts.json';
 import conversionDict from '../public/files/conversion_dict.json'
+import datasets from '../public/files/datasets.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -31,6 +32,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import DownloadIcon from '@mui/icons-material/Download';
 import Popover from '@mui/material/Popover';
 import Card from '@mui/material/Card';
+import ListSubheader from '@mui/material/ListSubheader';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -71,6 +73,7 @@ export default function Page() {
     const [loading, setLoading] = React.useState(false);
     const [file, setFile] = React.useState(null);
     const [useDefaultFile, setUseDefaultFile] = React.useState(false);
+    const [useCannedFile, setuseCannedFile] = React.useState(false);
     const [alert, setAlert] = React.useState('')
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
@@ -126,8 +129,7 @@ export default function Page() {
 
     const handleFileRead =  useCallback((e) => {
        
-        var geneStats;
-        var geneCounts;
+        
         const content = fileReader.result;
 
         var rows = content.split('\n')
@@ -136,9 +138,13 @@ export default function Page() {
         } else {
             rows = rows.map(row => row.split('\t'))
         }
+        calcFileStats(rows);
+    }, [fileReader]);
+
+    const calcFileStats = useCallback((rows) => {
         var n = rows[0].length - 1
-        geneCounts = {}
-        geneStats = {}
+        var geneCounts = {}
+        var geneStats = {}
         var gene;
         var data;
         var stats;
@@ -147,7 +153,7 @@ export default function Page() {
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                if (gene.contains('.')) {
+                if (gene.includes('.')) {
                     gene = gene.split('.')[0]
                 }
                 var convertedSymbol = conversionDict[gene];
@@ -156,8 +162,9 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats, fileReader]);
+    }, [submitGeneStats])
 
+    
     const handleFileChosen = useCallback((file) => {
         fileReader = new FileReader();
         fileReader.onloadend = handleFileRead;
@@ -165,14 +172,22 @@ export default function Page() {
     }, [handleFileRead]);
 
 
-    const submitTest = useCallback(() => {
+    const submitTest = useCallback( async () => {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
 
                 submitGeneStats(exampleData, exampleCounts)
-            } else {
-
+            } else if (useCannedFile) {
+                setLoading(true);
+                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.name).then((r) => r.text())
+                .then(text  => {
+                  console.log(text);
+                  const rows = text.split('\n').map(row => row.split('\t'));
+                calcFileStats(rows);
+                })  
+            }
+            else {
                 setLoading(true);
                 handleFileChosen(file)
             }
@@ -198,7 +213,6 @@ export default function Page() {
     return (
 
         <div style={{ position: 'relative', minHeight: '100vh' }}>
-
             <Head />
 
             <Backdrop
@@ -317,17 +331,34 @@ export default function Page() {
                                                 </TableContainer>
                                             </Popover>
 
-                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null) }} variant="outlined" component="span" color="secondary">
-                                                Clear Chosen File
-                                            </Button>
+                                            
                                         </div>
                                     </div>
+                                    <div>Or choose an RNA-seq profile from a variety of collected studies</div>
+                                        <Box sx={{ width: 390 }}>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                color="secondary"
+                                                value={file}
+                                                onChange={(event) => {
+                                                    setFile(event.target.value)
+                                                    setuseCannedFile(true)
+                                                }}
+                                            >
+                                                <ListSubheader>Senescence</ListSubheader>
+                                                {datasets.map( x => {
+                                                     return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
+                                                })}
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
+                                    
+
                                     <div>Chosen file:</div>
                                     <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
-
-                                </div>
-
-                                <div style={{ alignItems: 'flex-start' }} className={styles.verticalFlexbox}>
+                                    <Button onClick={() => { setUseDefaultFile(false); setFile(null); setuseCannedFile(false)}} variant="outlined" component="span" color="secondary">
+                                        Clear Chosen File
+                                    </Button>
 
                                 </div>
 
