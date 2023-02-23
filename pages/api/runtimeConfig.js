@@ -3,6 +3,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       NEXT_PUBLIC_ENTRYPOINT: process.env.NEXT_PUBLIC_ENTRYPOINT || '',
       NEXT_PUBLIC_GENERANGERURL: process.env.NEXT_PUBLIC_GENERANGERURL || '',
+      NEXT_PUBLIC_DOWNLOADS: process.env.NEXT_PUBLIC_DOWNLOADS || '',
     })
   } else {
     res.status(404).end()
