@@ -172,7 +172,7 @@ export default function Page() {
     }, [handleFileRead]);
 
 
-    const submitTest = useCallback( async () => {
+    const submitFile = useCallback( async () => {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
@@ -180,9 +180,8 @@ export default function Page() {
                 submitGeneStats(exampleData, exampleCounts)
             } else if (useCannedFile) {
                 setLoading(true);
-                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.name).then((r) => r.text())
+                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.cat +'/'+ file.name).then((r) => r.text())
                 .then(text  => {
-                  console.log(text);
                   const rows = text.split('\n').map(row => row.split('\t'));
                 calcFileStats(rows);
                 })  
@@ -345,10 +344,13 @@ export default function Page() {
                                                     setuseCannedFile(true)
                                                 }}
                                             >
-                                                <ListSubheader>Senescence</ListSubheader>
-                                                {datasets.map( x => {
-                                                     return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
+                                                <ListSubheader>Cancer</ListSubheader>
+                                                {datasets.map( x => { if (x.cat == 'Cancer') return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
                                                 })}
+                                                <ListSubheader>Senescence</ListSubheader>
+                                                {datasets.map( x => { if (x.cat == 'Senescence') return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
+                                                })}
+                                                 
                                             </Select>
                                         </FormControl>
                                     </Box>
@@ -411,7 +413,7 @@ export default function Page() {
                             </div>
                         </CardContent>
                         <CardActions style={{ justifyContent: 'center' }}>
-                            <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitTest}>Submit</Button>
+                            <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitFile}>Submit</Button>
                         </CardActions>
                         <>
                         {alert}
