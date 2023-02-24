@@ -278,7 +278,7 @@ export default function Page() {
                                                 <Button onClick={() => setUseDefaultFile(true)} className={styles.darkOnHover} variant="text" color="secondary">
                                                     Load example file
                                                 </Button>
-                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
+                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155_LSCC_P4T.tsv" download="GSE49155_LSCC_P4T.tsv">
                                                     <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
                                                         Download example file
                                                     </Button>
