@@ -26,8 +26,8 @@ export default function Page() {
                     <h1 style={{textAlign: 'center'}}>Usage License</h1>
 
                     
-                    <a href='https://creativecommons.org/licenses/by-sa/3.0/' target={'_blank'}><img style={{width: '300px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CC_BY-SA_3.0.png"}></img></a>
-                    <div style={{textAlign: 'center'}}> <a href='https://creativecommons.org/licenses/by-sa/3.0/' target={'_blank'}>CC BY-SA 3.0</a></div>
+                    <a href='https://creativecommons.org/licenses/by-sa/3.0/' target={'_blank'} rel={"noopener noreferrer"}><img style={{maxWidth: '400px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CC_BY-SA_3.0.png"} alt={"CC BY-SA 3.0"}></img></a>
+                    <div style={{textAlign: 'center'}}> <a href='https://creativecommons.org/licenses/by-sa/3.0/' target={'_blank'} rel={"noopener noreferrer"}>CC BY-SA 3.0</a></div>
                 </div>
 
                 <Footer/>
