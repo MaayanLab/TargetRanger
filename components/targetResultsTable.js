@@ -13,7 +13,6 @@ export default function TargetResultTable(props) {
     const runtimeConfig = useRuntimeConfig()
 
     var results = JSON.parse(props.results);
-    const membraneGenes = JSON.parse(props.membraneGenes);
     const filt = props.filt;
     const setFilt = props.setFilt;
     const setGene = props.setgene;
@@ -22,6 +21,7 @@ export default function TargetResultTable(props) {
         { field: "gene", headerName: "Target", minWidth: 100, flex: 1},
         { field: "t", headerName: "t statistic", type: "number", flex: 1, minWidth: 150 },
         { field: "p", headerName: "P-value", type: "number", flex: 1, minWidth: 200 },
+        { field: "adj_p", headerName: "Adj. P-value", type: "number", flex: 1, minWidth: 200 },
         { field: "log2fc", headerName: "log2 Fold Change", type: "number", flex: 1, minWidth: 160},
         { field: "membrane", headerName: "Membrane Protien", type: "number", flex: 1, minWidth: 150},
         { field: "secreted", headerName: "Secreted Protien", type: "number", flex: 1, minWidth: 150},
@@ -93,6 +93,12 @@ export default function TargetResultTable(props) {
             results[i]['p'] = Number.parseFloat(pval).toExponential(4)
         } else {
             results[i]['p'] = Number.parseFloat(pval).toFixed(4)
+        }
+        var pval = results[i]['adj_p']
+        if (pval < .001) {
+            results[i]['adj_p'] = Number.parseFloat(pval).toExponential(4)
+        } else {
+            results[i]['adj_p'] = Number.parseFloat(pval).toFixed(4)
         }
         results[i]['log2fc'] = Number.parseFloat(results[i]['log2fc']).toFixed(2)
     }

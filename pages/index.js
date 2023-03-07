@@ -86,9 +86,6 @@ export default function Page() {
 
     const router = useRouter();
 
-    var fileReader;
-
-
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
@@ -156,10 +153,10 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats, fileReader]);
+    }, [submitGeneStats]);
 
     const handleFileChosen = useCallback((file) => {
-        fileReader = new FileReader();
+        var fileReader = new FileReader();
         fileReader.onloadend = handleFileRead;
         fileReader.readAsText(file);
     }, [handleFileRead]);
