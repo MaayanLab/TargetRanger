@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         
         let result = await prisma.$queryRaw
         `
-            select gene, t, p, log2fc
+            select gene, t, p, adj_p, log2fc
             from screen_targets_vectorized(
             ${input_data}::jsonb,
             (
