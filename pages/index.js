@@ -344,6 +344,7 @@ export default function Page() {
                                                         <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq)</MenuItem>
                                                         <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq)</MenuItem>
                                                         <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq)</MenuItem>
+                                                        <MenuItem color="secondary" value={4}>HuBMAP (RNA-seq)</MenuItem>
                                                     </Select>
                                                 </FormControl>
                                             </Box>
