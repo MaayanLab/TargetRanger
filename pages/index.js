@@ -1,6 +1,6 @@
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from '../styles/TargetScreener.module.css';
 import Footer from '../components/footer';
 import Header from '../components/header';
@@ -71,7 +71,7 @@ const databases = new Map([
 
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
-    var fileReader;
+    var fileReader = useRef(null);
 
     // For MUI loading icon
 
@@ -135,7 +135,7 @@ export default function Page() {
        
         var geneStats;
         var geneCounts;
-        const content = fileReader.result;
+        const content = fileReader.current.result;
 
         var rows = content.split('\n')
         if (rows[1].includes(',')) {
@@ -163,12 +163,12 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats]);
+    }, [submitGeneStats, fileReader]);
 
     const handleFileChosen = useCallback((file) => {
-        fileReader = new FileReader();
-        fileReader.onloadend = handleFileRead;
-        fileReader.readAsText(file);
+        fileReader.current = new FileReader();
+        fileReader.current.onloadend = handleFileRead;
+        fileReader.current.readAsText(file);
     }, [handleFileRead, fileReader]);
 
 
@@ -259,7 +259,7 @@ export default function Page() {
                                                 style={{ display: "none" }}
                                                 id="fileUpload"
                                                 type="file"
-                                                onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]); setFileName(e.target.files[0].name) }}
+                                                onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]); setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) }}
                                             />
                                             <label htmlFor="fileUpload">
                                                 <Button variant="contained" color="secondary" component="span">
