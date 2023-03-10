@@ -154,7 +154,7 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats, fileReader.result]);
+    }, [submitGeneStats]);
 
     const handleFileChosen = useCallback((file) => {
         fileReader = new FileReader();
