@@ -16,6 +16,7 @@ export default function TargetResultTable(props) {
     const filt = props.filt;
     const setFilt = props.setFilt;
     const setGene = props.setgene;
+    const fname = props.fname;
 
     const columns = [
         { field: "gene", headerName: "Target", minWidth: 100, flex: 1},
@@ -78,7 +79,7 @@ export default function TargetResultTable(props) {
     function CustomToolbar() {
       return (
         <GridToolbarContainer>
-          <GridToolbarExport printOptions={{ disableToolbarButton: true }} color="secondary"/>
+          <GridToolbarExport printOptions={{ disableToolbarButton: true }} csvOptions={{fileName: fname}} color="secondary"/>
         </GridToolbarContainer>
       );
     }

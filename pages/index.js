@@ -1,6 +1,6 @@
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/TargetScreener.module.css';
 import Footer from '../components/footer';
 import Header from '../components/header';
@@ -62,6 +62,12 @@ function stddev(arr) {
     return [mean, std]
 }
 
+const databases = new Map([
+    [0, 'ARCHS4'],
+    [1, 'GTEx_transcriptomics'],
+    [2, 'Tabula_Sapiens'],
+]);
+
 
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
@@ -73,6 +79,7 @@ export default function Page() {
     const [file, setFile] = React.useState(null);
     const [useDefaultFile, setUseDefaultFile] = React.useState(false);
     const [alert, setAlert] = React.useState('')
+    const [fileName, setFileName] = React.useState('')
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
     const [secretedGenes, setSecretedGenes] = React.useState(false);
@@ -103,7 +110,7 @@ export default function Page() {
         for (let i = 0; i < genes.length; i++) {
             if (genesIncluded.includes(genes[i])) targetStats[genes[i]] = geneCounts[genes[i]]
         }
-
+        console.log(fileName)
         let href = {
             pathname: "/targetscreenerresults",
             query: {
@@ -111,6 +118,8 @@ export default function Page() {
                 ogfile: JSON.stringify(targetStats),
                 membraneGenes: membraneGenes,
                 secretedGenes: secretedGenes,
+                fileName: fileName,
+                precomputedBackground: databases.get(precomputedBackground),
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -119,7 +128,7 @@ export default function Page() {
             setLoading(false)
             alert('Error with returned data')
         })
-    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router])
+    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
 
 
     const handleFileRead =  useCallback((e) => {
@@ -167,10 +176,8 @@ export default function Page() {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
-
                 submitGeneStats(exampleData, exampleCounts)
             } else {
-
                 setLoading(true);
                 handleFileChosen(file)
             }
@@ -252,7 +259,7 @@ export default function Page() {
                                                 style={{ display: "none" }}
                                                 id="fileUpload"
                                                 type="file"
-                                                onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]) }}
+                                                onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]); setFileName(e.target.files[0].name) }}
                                             />
                                             <label htmlFor="fileUpload">
                                                 <Button variant="contained" color="secondary" component="span">
@@ -260,7 +267,7 @@ export default function Page() {
                                                 </Button>
                                             </label>
                                             <div className={styles.horizontalFlexbox}>
-                                                <Button onClick={() => setUseDefaultFile(true)} className={styles.darkOnHover} variant="text" color="secondary">
+                                                <Button onClick={() => {setUseDefaultFile(true); setFileName('GSE49155-P4T')}} className={styles.darkOnHover} variant="text" color="secondary">
                                                     Load example file
                                                 </Button>
                                                 <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
@@ -315,7 +322,7 @@ export default function Page() {
                                                 </TableContainer>
                                             </Popover>
 
-                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null) }} variant="outlined" component="span" color="secondary">
+                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null); setFileName('') }} variant="outlined" component="span" color="secondary">
                                                 Clear Chosen File
                                             </Button>
                                         </div>
