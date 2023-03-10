@@ -65,6 +65,7 @@ function stddev(arr) {
 
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
+    var fileReader;
 
     // For MUI loading icon
 
@@ -153,13 +154,13 @@ export default function Page() {
             }
         }
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats]);
+    }, [submitGeneStats, fileReader.result]);
 
     const handleFileChosen = useCallback((file) => {
-        var fileReader = new FileReader();
+        fileReader = new FileReader();
         fileReader.onloadend = handleFileRead;
         fileReader.readAsText(file);
-    }, [handleFileRead]);
+    }, [handleFileRead, fileReader]);
 
 
     const submitTest = useCallback(() => {
