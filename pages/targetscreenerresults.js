@@ -28,6 +28,7 @@ export default function Results() {
   const runtimeConfig = useRuntimeConfig()
   const string_res = router.query['res']
   const string_stats = router.query['ogfile']
+  const fname = router.query['fileName'] + '-' + router.query['precomputedBackground']
   // Set state of membrane gene filter based on submission page
   var initMembraneVal;
   var initSecretedVal;
@@ -146,7 +147,7 @@ export default function Results() {
               <ToggleButton value={false}>NO</ToggleButton>
             </ToggleButtonGroup>
           </div>
-          <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} />
+          <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} fname={fname}/>
           <div className={styles.textDiv}>
             <p>View a box plot for each identified target gene in the table by clicking on the table row, or by selecting the gene from the dropdown box below:</p>
           </div>

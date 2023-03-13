@@ -7,7 +7,7 @@ database:
   # create: false
   # DATABASE_URL: 
   create: true
-  image: maayanlab/postgres-py:14.4
+  image: maayanlab/postgres-py:14.4-2
   persistence:
     storageClassName: gp2
     size: 10Gi
