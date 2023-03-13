@@ -187,7 +187,7 @@ export default function Page() {
                 submitGeneStats(exampleData, exampleCounts)
             } else if (useCannedFile) {
                 setLoading(true);
-                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.cat +'/'+ file.name).then((r) => r.text())
+                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.cat +'/'+ file.filename).then((r) => r.text())
                 .then(text  => {
                   const rows = text.split('\n').map(row => row.split('\t'));
                 calcFileStats(rows);
@@ -349,15 +349,16 @@ export default function Page() {
                                                 color="secondary"
                                                 value={file}
                                                 onChange={(event) => {
-                                                    setFile(event.target.value)
-                                                    setuseCannedFile(true)
+                                                    setFile(event.target.value);
+                                                    setFileName(event.target.value.filename.replace('.tsv', ''));
+                                                    setuseCannedFile(true);
                                                 }}
                                             >
-                                                <ListSubheader>Cancer</ListSubheader>
-                                                {datasets.map( x => { if (x.cat == 'Cancer') return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
-                                                })}
                                                 <ListSubheader>Senescence</ListSubheader>
-                                                {datasets.map( x => { if (x.cat == 'Senescence') return <MenuItem color="secondary" value={x}>{x.name} </MenuItem>
+                                                {datasets.map( x => { if (x.cat == 'Senescence') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
+                                                })}
+                                                <ListSubheader>TCGA</ListSubheader>
+                                                {datasets.map( x => { if (x.cat == 'TCGA') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
                                                 })}
                                                  
                                             </Select>
