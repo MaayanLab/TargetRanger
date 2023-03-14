@@ -100,7 +100,7 @@ export default function SideBar(props) {
 
                                         <FormControlLabel
                                             className={styles.formItem}
-                                            control={<Switch onChange={() => { setDatabase(0) }} checked={database == 0} />}
+                                            control={<Switch onChange={() => { setDatabase(4) }} checked={database == 4} />}
                                             label={
                                                 <div className={styles.dbLogo}>
                                                     <img className={styles.databaseLogo} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} alt="archs4 Logo" />
@@ -116,98 +116,23 @@ export default function SideBar(props) {
 
                                         <FormControlLabel
                                             className={styles.formItem}
-                                            control={<Switch onChange={() => { setDatabase(1) }} checked={database == 1} />}
+                                            control={<Switch onChange={() => { setDatabase(5) }} checked={database == 5} />}
                                             label={
                                                 <div className={styles.dbLogo}>
-                                                    <img className={styles.databaseLogo} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} alt="GTEx Logo" />
+                                                    <img className={styles.databaseLogo} style={{ borderRadius: '3px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} alt="CCLE Logo" />
                                                     <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                        <div className={styles.tooltipText}><a href="https://gtexportal.org/home" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/23715323/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
+                                                        <div className={styles.tooltipText}><a href="https://sites.broadinstitute.org/ccle/" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/22460905/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
                                                         <IconButton><InfoIcon color='info' /></IconButton>
                                                     </HtmlTooltip>
                                                 </div>
                                             }
                                             labelPlacement="start" />
-
-                                        <div className={styles.logoDesc}>{GTEx_transcriptomics_desc}</div>
-
-
-
-                                        <FormControlLabel
-                                            className={styles.formItem}
-                                            control={<Switch onChange={() => { setDatabase(2) }} checked={database == 2} />}
-                                            label={
-                                                <div className={styles.dbLogo}>
-                                                    <img className={styles.databaseLogo} style={{ borderRadius: '8px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} alt="Tabula Sapiens Logo" />
-                                                    <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                        <div className={styles.tooltipText}><a href="https://tabula-sapiens-portal.ds.czbiohub.org" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/35549404/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                        <IconButton><InfoIcon color='info' /></IconButton>
-                                                    </HtmlTooltip>
-                                                </div>
-                                            }
-                                            labelPlacement="start" />
-
-                                        <div className={styles.logoDesc}>{Tabula_Sapiens_desc}</div>
-
-                                        
+                                            <div className={styles.logoDesc}>{CCLE_transcriptomics_desc}</div>
 
                                     </FormGroup>
                                     </AccordionDetails>
                                 </Accordion>
                                 </div>
-                                
-
-                                
-
-                                <Accordion style={{ backgroundColor: '#cea6dc', width: '94%', boxShadow: 'none', textAlign: 'center'}}>
-                                    <AccordionSummary
-                                        expandIcon={<ArrowDropDownIcon />}
-                                        >
-                                        <h3 style={{ margin: '0', padding: '4', textAlign: 'center'}}>Additional Atlases</h3>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                            <div className={styles.dbLogo}>
-                                                <img className={styles.databaseLogo} style={{ borderRadius: '3px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} alt="CCLE Logo" />
-                                                <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                    <div className={styles.tooltipText}><a href="https://sites.broadinstitute.org/ccle/" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/22460905/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                    <IconButton><InfoIcon color='info' /></IconButton>
-                                                </HtmlTooltip>
-                                            </div>
-                                            <div className={styles.logoDesc}>{CCLE_transcriptomics_desc}</div>
-                                            <div className={styles.dbLogo}>
-                                                <img className={styles.databaseLogo} style={{ width: '200px', marginRight: '0' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPM.gif"} alt="HPM Logo" />
-                                                <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                    <div className={styles.tooltipText}><a href="http://www.humanproteomemap.org" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/24870542/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                    <IconButton><InfoIcon color='info' /></IconButton>
-                                                </HtmlTooltip>
-                                            </div>
-                                            <div className={styles.logoDesc}>{HPM_desc}</div>
-                                            <div className={styles.dbLogo}>
-                                                <img className={styles.databaseLogo} style={{ width: '200px', padding: '10px', marginLeft: '0px', marginRight: '-20px', backgroundColor: '#8eaabe', borderRadius: '5px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/HPA.svg"} alt="HPA Logo" />
-                                                <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                    <div className={styles.tooltipText}><a href="https://www.proteinatlas.org" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/25613900/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                    <IconButton><InfoIcon color='info' /></IconButton>
-                                                </HtmlTooltip>
-                                            </div>
-                                            <div className={styles.logoDesc}>{HPA_desc}</div>
-                                            <div className={styles.dbLogo}>
-                                                <img className={styles.databaseLogo} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_proteomics.png"} alt="GTEx Logo" />
-                                                <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                    <div className={styles.tooltipText}><a href="https://tsomics.shinyapps.io/RNA_vs_protein/" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/32916130/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                    <IconButton><InfoIcon color='info' /></IconButton>
-                                                </HtmlTooltip>
-                                            </div>
-                                            <div className={styles.logoDesc}>{GTEx_proteomics_desc}</div>
-                                            <div className={styles.dbLogo}>
-                                                <img className={styles.databaseLogo} style={{ borderRadius: '3px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_proteomics.jpeg"} alt="CCLE Logo" />
-                                                <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
-                                                    <div className={styles.tooltipText}><a href="https://gygi.hms.harvard.edu" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/31978347/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
-                                                    <IconButton><InfoIcon color='info' /></IconButton>
-                                                </HtmlTooltip>
-                                            </div>
-                                            <div className={styles.logoDesc}>{CCLE_proteomics_desc}</div>
-
-                                    </AccordionDetails>
-                                </Accordion>
                             </div>
                         </Box>
                 </div>
