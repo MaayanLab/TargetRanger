@@ -1,15 +1,11 @@
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import PropTypes from 'prop-types';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../styles/TargetScreener.module.css';
 import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
 import SideBar from '../components/sideBar';
-import SideBarCellLine from '../components/sideBarCellLine';
 import exampleData from '../public/files/GSE49155.json';
 import exampleCounts from '../public/files/GSE49155-counts.json';
 import conversionDict from '../public/files/conversion_dict.json'
@@ -42,44 +38,9 @@ import CardContent from '@mui/material/CardContent';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
 import { Drawer } from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import { useCallback } from 'react';
-
-
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`fullwidth-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    <Typography component={'span'}>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
-}
-
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `fullwidth-tabpanel-${index}`,
-    };
-}
-
 
 
 function stddev(arr) {
@@ -123,28 +84,17 @@ export default function Page() {
 
     // For MUI loading icon
 
-    const [loading, setLoading] = React.useState(false);
-    const [file, setFile] = React.useState(null);
-    const [useDefaultFile, setUseDefaultFile] = React.useState(false);
-    const [useCannedFile, setuseCannedFile] = React.useState(false);
-    const [alert, setAlert] = React.useState('')
-    const [fileName, setFileName] = React.useState('')
+    const [loading, setLoading] = useState(false);
+    const [file, setFile] = useState(null);
+    const [useDefaultFile, setUseDefaultFile] = useState(false);
+    const [alert, setAlert] = useState('')
+    const [fileLoading, setFileLoading] = useState(false)
+    const [fileName, setFileName] = useState('')
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
     const [secretedGenes, setSecretedGenes] = React.useState(false);
 
     const [precomputedBackground, setPrecomputedBackground] = React.useState(0);
-
-    const handleChange = (event, newValue) => {
-        if (newValue == 0) {
-            setPrecomputedBackground(0);
-        }
-        if (newValue == 1) {
-            setPrecomputedBackground(4);
-        }
-
-        setValue(newValue);
-    };
 
     const [drawerState, setDrawerState] = useState(false);
 
@@ -155,8 +105,6 @@ export default function Page() {
     const router = useRouter();
 
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
-
-
 
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
@@ -193,8 +141,6 @@ export default function Page() {
 
     const submitGeneStatsCellLine = useCallback(async (fileStats) => {
 
-
-
         var items = Object.keys(fileStats['genes']).map(
             (key) => { return [key, fileStats['genes'][key]['std']] });
 
@@ -229,7 +175,7 @@ export default function Page() {
                 precomputedBackground: databases.get(precomputedBackground),
             }
         };
-        
+
         router.push(href, '/celllineresults').then(() => {
             setLoading(false);
         }).catch(() => {
@@ -291,15 +237,7 @@ export default function Page() {
             if (useDefaultFile) {
                 setLoading(true);
                 submitGeneStats(exampleData, exampleCounts)
-            } else if (useCannedFile) {
-                setLoading(true);
-                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.cat + '/' + file.filename).then((r) => r.text())
-                    .then(text => {
-                        const rows = text.split('\n').map(row => row.split('\t'));
-                        calcFileStats(rows);
-                    })
-            }
-            else {
+            } else {
                 setLoading(true);
                 handleFileChosen(file)
             }
@@ -309,33 +247,7 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }, [file, runtimeConfig,  handleFileChosen, submitGeneStats, calcFileStats, useDefaultFile, useCannedFile]);
-
-
-    const submitCellLine = useCallback(async () => {
-        if (useDefaultFile != false || file != null) {
-            if (useDefaultFile) {
-                setLoading(true);
-                submitGeneStatsCellLine(exampleData)
-            } else if (useCannedFile) {
-                setLoading(true);
-                fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + file.cat + '/' + file.filename).then((r) => r.text())
-                    .then(text => {
-                        const rows = text.split('\n').map(row => row.split('\t'));
-                        calcFileStats(rows);
-                    })
-            }
-            else {
-                setLoading(true);
-                handleFileChosen(file)
-            }
-        } else {
-            setAlert(<Alert variant="outlined" severity="error">Please select a file to submit</Alert>)
-            setTimeout(() => {
-                setAlert('');
-            }, 3000);
-        }
-    }, [file, handleFileChosen, submitGeneStatsCellLine, calcFileStats, useDefaultFile, runtimeConfig, useCannedFile]);
+    }, [file, runtimeConfig, handleFileChosen, submitGeneStats, calcFileStats, useDefaultFile]);
 
     // For input file example table
     const rows = [
@@ -343,6 +255,12 @@ export default function Page() {
         { name: 'Gene Symbol/Ensembl ID', rep1: 50, rep2: 89, rep3: '...' },
         { name: 'Gene Symbol/Ensembl ID', rep1: '...', rep2: '...', rep3: '...' },
     ];
+
+    useEffect(() => {
+        setTimeout(() => {
+            setFileLoading(false);
+        }, 2000);
+    }, [fileLoading])
 
     // For MUI Popover
 
@@ -362,150 +280,125 @@ export default function Page() {
 
             <div className={styles.mainDiv}>
                 <Header />
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
-                    <Tabs value={value} onChange={handleChange} aria-label="fullwidth tabs example" variant="fullWidth">
-                        <Tab label="Identify Highly Expressed Targets" {...a11yProps(0)} />
-                        <Tab label="Identify Similar Cell Lines" {...a11yProps(1)} />
-                    </Tabs>
-                </Box>
-                <TabPanel value={value} index={0}>
-                    <Box className={styles.rowFlexbox}>
-                        <div className={styles.sidePanel}>
+                <Box className={styles.rowFlexbox}>
+                    <div className={styles.sidePanel}>
+                        <Box
+                            sx={{ width: '375px', height: '100%' }}
+                            className={styles.panel}
+                        >
+                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                        </Box>
+                    </div>
+                    <div className={styles.drawerButton}>
+                        <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{ transform: 'scale(2)', alignItems: 'start' }} /></Button>
+                        <Drawer
+                            anchor={'left'}
+                            open={drawerState}
+                            onClose={toggleDrawer(false)}
+                        >
                             <Box
                                 sx={{ width: '375px', height: '100%' }}
-                                className={styles.panel}
+                                className={styles.drawer}
                             >
                                 <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
                             </Box>
-                        </div>
-                        <div className={styles.drawerButton}>
-                            <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{ transform: 'scale(2)', alignItems: 'start' }} /></Button>
-                            <Drawer
-                                anchor={'left'}
-                                open={drawerState}
-                                onClose={toggleDrawer(false)}
-                            >
-                                <Box
-                                    sx={{ width: '375px', height: '100%' }}
-                                    className={styles.drawer}
-                                >
-                                    <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
-                                </Box>
-                            </Drawer>
-                        </div>
+                        </Drawer>
+                    </div>
 
-                        <Card >
-                            <CardContent>
-                                <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
+                    <Card >
+                        <CardContent>
+                            <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
 
-                                    <div className={styles.verticalFlexbox}>
-                                        <div className={styles.horizontalFlexbox}>
+                                <div className={styles.verticalFlexbox}>
 
-                                            <div className={styles.verticalFlexbox}>
-                                                <div><p>Upload RNA-seq profiles from the cells that you wish to target and remove</p></div>
-                                                <input
-                                                    style={{ display: "none" }}
-                                                    id="fileUpload"
-                                                    type="file"
-                                                    onChange={(e) => { setUseDefaultFile(false); setFile(e.target.files[0]); setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) }}
-                                                />
-                                                <label htmlFor="fileUpload">
-                                                    <Button variant="contained" color="secondary" component="span">
-                                                        Upload File
-                                                    </Button>
-                                                </label>
-                                                <div className={styles.horizontalFlexbox}>
-                                                    <Button onClick={() => { setUseDefaultFile(true); setFileName('GSE49155-P4T') }} className={styles.darkOnHover} variant="text" color="secondary">
-                                                        Load example file
-                                                    </Button>
-                                                    <a style={{ textDecoration: 'none' }} href="files/GSE49155_LSCC_P4T.tsv" download="GSE49155_LSCC_P4T.tsv">
-                                                        <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
-                                                            Download example file
-                                                        </Button>
-                                                    </a>
-                                                </div>
-                                                <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
-                                                    File specifications
+
+
+                                    <div className={styles.horizontalFlexbox}>
+
+                                        <div className={styles.verticalFlexbox}>
+                                            <div>Upload RNA-seq profiles from the cells that you wish to target and remove</div>
+                                            <input
+                                                style={{ display: "none" }}
+                                                id="fileUpload"
+                                                type="file"
+                                                onChange={(e) => { setFileLoading(true); setUseDefaultFile(false); setFile(e.target.files[0]); setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) }}
+                                            />
+                                            <label htmlFor="fileUpload">
+                                                <Button variant="contained" color="secondary" component="span">
+                                                    Upload File
                                                 </Button>
-                                                <Popover
-                                                    open={Boolean(anchorEl)}
-                                                    anchorEl={anchorEl}
-                                                    onClose={() => { setAnchorEl(null) }}
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'center',
-                                                    }}
-                                                    transformOrigin={{
-                                                        vertical: 'top',
-                                                        horizontal: 'center',
-                                                    }}
-                                                >
-                                                    <TableContainer component={Paper}>
-                                                        <Typography
-                                                            sx={{ textAlign: 'center' }}
-                                                            variant="h6"
-                                                            component={'span'}
-                                                        >
-                                                            File should be a tsv/csv of the following form:
-                                                        </Typography>
-                                                        <Table sx={{ width: 500 }} size="small">
-                                                            <TableHead>
-                                                                <TableRow>
-                                                                    <TableCell></TableCell>
-                                                                    <TableCell align="right"><b>Replicate 1</b></TableCell>
-                                                                    <TableCell align="right"><b>Replicate 2</b></TableCell>
-                                                                    <TableCell align="right"><b>...</b></TableCell>
-                                                                </TableRow>
-                                                            </TableHead>
-                                                            <TableBody>
-                                                                {rows.map((row) => (
-                                                                    <TableRow key={row.name}>
-                                                                        <TableCell><b>{row.name}</b></TableCell>
-                                                                        <TableCell align="right">{row.rep1}</TableCell>
-                                                                        <TableCell align="right">{row.rep2}</TableCell>
-                                                                        <TableCell align="right">{row.rep3}</TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </TableContainer>
-                                                </Popover>
+                                            </label>
+                                            <div className={styles.horizontalFlexbox}>
+                                                <Button onClick={() => { setUseDefaultFile(true); setFileLoading(<LinearProgress color="secondary" />); setFileName('GSE49155-P4T') }} className={styles.darkOnHover} variant="text" color="secondary">
+                                                    Load example file
+                                                </Button>
+                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
+                                                    <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
+                                                        Download example file
+                                                    </Button>
+                                                </a>
                                             </div>
+                                            <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
+                                                File specifications
+                                            </Button>
+                                            <Popover
+                                                open={Boolean(anchorEl)}
+                                                anchorEl={anchorEl}
+                                                onClose={() => { setAnchorEl(null) }}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <TableContainer component={Paper}>
+                                                    <Typography
+                                                        sx={{ textAlign: 'center' }}
+                                                        variant="h6"
+                                                    >
+                                                        File should be a tsv/csv of the following form:
+                                                    </Typography>
+                                                    <Table sx={{ width: 500 }} size="small">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell></TableCell>
+                                                                <TableCell align="right"><b>Replicate 1</b></TableCell>
+                                                                <TableCell align="right"><b>Replicate 2</b></TableCell>
+                                                                <TableCell align="right"><b>...</b></TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {rows.map((row) => (
+                                                                <TableRow key={row.name}>
+                                                                    <TableCell><b>{row.name}</b></TableCell>
+                                                                    <TableCell align="right">{row.rep1}</TableCell>
+                                                                    <TableCell align="right">{row.rep2}</TableCell>
+                                                                    <TableCell align="right">{row.rep3}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </TableContainer>
+                                            </Popover>
+
+                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null); setFileName('') }} variant="outlined" component="span" color="secondary">
+                                                Clear Chosen File
+                                            </Button>
                                         </div>
-                                        <div>Or choose an RNA-seq profile from a variety of collected studies</div>
-                                        <Box sx={{ width: 390 }}>
-                                            <FormControl fullWidth>
-                                                <Select
-                                                    color="secondary"
-                                                    value={file}
-                                                    onChange={(event) => {
-                                                        setUseDefaultFile(false);
-                                                        setFile(event.target.value);
-                                                        setFileName(event.target.value.filename);
-                                                        setuseCannedFile(true);
-                                                    }}
-                                                >
-                                                    <ListSubheader>Senescence</ListSubheader>
-                                                    {datasets.map(x => {
-                                                        if (x.cat == 'Senescence') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
-                                                    })}
-                                                    <ListSubheader>TCGA</ListSubheader>
-                                                    {datasets.map(x => {
-                                                        if (x.cat == 'TCGA') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
-                                                    })}
-
-                                                </Select>
-                                            </FormControl>
-                                        </Box>
-
-
-                                        <div>Chosen file:</div>
-                                        <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : fileName}</div>
-                                        <Button onClick={() => { setUseDefaultFile(false); setFile(null); setuseCannedFile(false); setFileName('') }} variant="outlined" component="span" color="secondary">
-                                            Clear Chosen File
-                                        </Button>
-
                                     </div>
+                                    <div>Chosen file:</div>
+                                    <Card className={styles.fileUpload}>
+                                        <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
+                                        {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)}
+                                    </Card>
+
+                                </div>
+
+
+                                <div className={styles.verticalFlexbox}>
 
                                     <div className={styles.verticalFlexbox}>
 
@@ -554,191 +447,16 @@ export default function Page() {
                                         </div>
                                     </div>
                                 </div>
-                            </CardContent>
-                            <CardActions style={{ justifyContent: 'center' }}>
-                                <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitFile}>Submit</Button>
-                            </CardActions>
-                            <>
-                                {alert}
-                            </>
-                        </Card>
-                    </Box>
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                <Box className={styles.rowFlexbox}>
-                        <div className={styles.sidePanel}>
-                            <Box
-                                sx={{ width: '375px', height: '100%' }}
-                                className={styles.panel}
-                            >
-                                <SideBarCellLine database={precomputedBackground} setdatabase={setPrecomputedBackground} />
-                            </Box>
-                        </div>
-                        <div className={styles.drawerButton}>
-                            <Button onClick={toggleDrawer(!drawerState)}><MenuIcon color="secondary" style={{ transform: 'scale(2)', alignItems: 'start' }} /></Button>
-                            <Drawer
-                                anchor={'left'}
-                                open={drawerState}
-                                onClose={toggleDrawer(false)}
-                            >
-                                <Box
-                                    sx={{ width: '375px', height: '100%' }}
-                                    className={styles.drawer}
-                                >
-                                    <SideBarCellLine database={precomputedBackground} setdatabase={setPrecomputedBackground} />
-                                </Box>
-                            </Drawer>
-                        </div>
-
-                        <Card >
-                            <CardContent>
-                                <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
-
-                                    <div className={styles.verticalFlexbox}>
-                                        <div className={styles.horizontalFlexbox}>
-
-                                            <div className={styles.verticalFlexbox}>
-                                                <div>Upload RNA-seq profiles to identify similar cell lines</div>
-                                                <input
-                                                    style={{ display: "none" }}
-                                                    id="fileUpload"
-                                                    type="file"
-                                                    onChange={(e) => { 
-                                                        setUseDefaultFile(false); 
-                                                        setFile(e.target.files[0]); 
-                                                        setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) 
-                                                        if (precomputedBackground < 4) {
-                                                            setPrecomputedBackground(4);
-                                                        }
-                                                    }}
-                                                />
-                                                <label htmlFor="fileUpload">
-                                                    <Button variant="contained" color="secondary" component="span">
-                                                        Upload File
-                                                    </Button>
-                                                </label>
-                                                <div className={styles.horizontalFlexbox}>
-                                                    <Button onClick={() => { setUseDefaultFile(true); setFileName('GSE49155-P4T');  }} className={styles.darkOnHover} variant="text" color="secondary">
-                                                        Load example file
-                                                    </Button>
-                                                    <a style={{ textDecoration: 'none' }} href="files/GSE49155_LSCC_P4T.tsv" download="GSE49155_LSCC_P4T.tsv">
-                                                        <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
-                                                            Download example file
-                                                        </Button>
-                                                    </a>
-                                                </div>
-                                                <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
-                                                    File specifications
-                                                </Button>
-                                                <Popover
-                                                    open={Boolean(anchorEl)}
-                                                    anchorEl={anchorEl}
-                                                    onClose={() => { setAnchorEl(null) }}
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'center',
-                                                    }}
-                                                    transformOrigin={{
-                                                        vertical: 'top',
-                                                        horizontal: 'center',
-                                                    }}
-                                                >
-                                                    <TableContainer component={Paper}>
-                                                        <Typography
-                                                            sx={{ textAlign: 'center' }}
-                                                            variant="h6"
-                                                            component={'span'}
-                                                        >
-                                                            File should be a tsv/csv of the following form:
-                                                        </Typography>
-                                                        <Table sx={{ width: 500 }} size="small">
-                                                            <TableHead>
-                                                                <TableRow>
-                                                                    <TableCell></TableCell>
-                                                                    <TableCell align="right"><b>Replicate 1</b></TableCell>
-                                                                    <TableCell align="right"><b>Replicate 2</b></TableCell>
-                                                                    <TableCell align="right"><b>...</b></TableCell>
-                                                                </TableRow>
-                                                            </TableHead>
-                                                            <TableBody>
-                                                                {rows.map((row) => (
-                                                                    <TableRow key={row.name}>
-                                                                        <TableCell><b>{row.name}</b></TableCell>
-                                                                        <TableCell align="right">{row.rep1}</TableCell>
-                                                                        <TableCell align="right">{row.rep2}</TableCell>
-                                                                        <TableCell align="right">{row.rep3}</TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </TableContainer>
-                                                </Popover>
-
-                                            </div>
-                                        </div>
-                                        <div>Chosen file:</div>
-                                        <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : fileName}</div>
-                                        <Button onClick={() => { setUseDefaultFile(false); setFile(null); setuseCannedFile(false) }} variant="outlined" component="span" color="secondary">
-                                            Clear Chosen File
-                                        </Button>
-
-                                    </div>
-
-                                    <div className={styles.verticalFlexbox}>
-                                    <div>Or choose an RNA-seq profile from a variety of collected studies</div>
-                                        <Box sx={{ width: 390 }}>
-                                            <FormControl fullWidth>
-                                                <Select
-                                                    color="secondary"
-                                                    value={file}
-                                                    onChange={(event) => {
-                                                        setUseDefaultFile(false);
-                                                        setFile(event.target.value);
-                                                        setFileName(event.target.value.filename);
-                                                        setuseCannedFile(true);
-                                                    }}
-                                                >
-                                                    <ListSubheader>Senescence</ListSubheader>
-                                                    {datasets.map(x => {
-                                                        if (x.cat == 'Senescence') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
-                                                    })}
-                                                    <ListSubheader>TCGA</ListSubheader>
-                                                    {datasets.map(x => {
-                                                        if (x.cat == 'TCGA') return <MenuItem color="secondary" value={x}>{x.filename} </MenuItem>
-                                                    })}
-
-                                                </Select>
-                                            </FormControl>
-                                        </Box>
-
-                                        <div>Normal tissue background:</div>
-
-                                        <div className={styles.horizontalFlexbox}>
-                                            <Box sx={{ width: 390 }}>
-                                                <FormControl fullWidth>
-                                                    <Select
-                                                        color="secondary"
-                                                        value={precomputedBackground}
-                                                        onChange={(event) => setPrecomputedBackground(event.target.value)}
-                                                    >
-                                                        <MenuItem color="secondary" value={4}>ARCHS4 Cell Lines (bulk RNA-seq)</MenuItem>
-                                                        <MenuItem color="secondary" value={5}>CCLE Transcriptomics</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            </Box>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardActions style={{ justifyContent: 'center' }}>
-                                <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitCellLine}>Submit</Button>
-                            </CardActions>
-                            <>
-                                {alert}
-                            </>
-                        </Card>
-                    </Box>
-                </TabPanel>
+                            </div>
+                        </CardContent>
+                        <CardActions style={{ justifyContent: 'center' }}>
+                            <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitFile}>Submit</Button>
+                        </CardActions>
+                        <>
+                            {alert}
+                        </>
+                    </Card>
+                </Box>
 
                 <Footer />
             </div >
