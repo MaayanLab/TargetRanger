@@ -106,12 +106,14 @@ export default function Page() {
 
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
+        const bg = databases.get(precomputedBackground)
+
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 'inputData': fileStats, 'bg': precomputedBackground })
+            body: JSON.stringify({ 'inputData': fileStats, 'bg': bg })
         })
         let json = await res.json();
         const genes = json.map(item => item.gene)
@@ -128,7 +130,7 @@ export default function Page() {
                 membraneGenes: membraneGenes,
                 secretedGenes: secretedGenes,
                 fileName: fileName,
-                precomputedBackground: databases.get(precomputedBackground),
+                precomputedBackground: bg,
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -138,51 +140,6 @@ export default function Page() {
             alert('Error with returned data')
         })
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
-
-    const submitGeneStatsCellLine = useCallback(async (fileStats) => {
-
-        var items = Object.keys(fileStats['genes']).map(
-            (key) => { return [key, fileStats['genes'][key]['std']] });
-
-        items.sort(
-            (first, second) => { return first[1] - second[1] }
-        );
-
-        var keys = items.map(
-            (e) => { return e[0] });
-
-        var genes_to_include = keys.slice(-250, -1)
-
-        var final_dict = { "genes": {} }
-
-        for (let i = 0; i < genes_to_include.length; i++) {
-            final_dict["genes"][genes_to_include[i]] = fileStats["genes"][genes_to_include[i]]
-        }
-
-        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_cell_lines`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 'inputData': final_dict, 'bg': precomputedBackground })
-        })
-        let json = await res.json();
-        let href = {
-            pathname: "/celllineresults",
-            query: {
-                res: JSON.stringify(json),
-                fileName: fileName,
-                precomputedBackground: databases.get(precomputedBackground),
-            }
-        };
-
-        router.push(href, '/celllineresults').then(() => {
-            setLoading(false);
-        }).catch(() => {
-            setLoading(false)
-            alert('Error with returned data')
-        })
-    }, [runtimeConfig, alert, router, fileName, precomputedBackground])
 
     const calcFileStats = useCallback((rows) => {
         var n = rows[0].length - 1
@@ -206,10 +163,9 @@ export default function Page() {
         }
         if (precomputedBackground < 4) {
             submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-        } else {
-            submitGeneStatsCellLine({ 'genes': geneStats, 'n': n })
         }
-    }, [submitGeneStats, submitGeneStatsCellLine, precomputedBackground])
+    }, [submitGeneStats, precomputedBackground])
+
 
     const handleFileRead = useCallback((e) => {
 
@@ -390,10 +346,9 @@ export default function Page() {
                                         </div>
                                     </div>
                                     <div>Chosen file:</div>
-                                    <Card className={styles.fileUpload}>
+                                   
                                         <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
-                                        {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)}
-                                    </Card>
+                                        {/* {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)} */}
 
                                 </div>
 
