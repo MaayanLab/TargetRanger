@@ -96,12 +96,14 @@ export default function Page() {
 
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
+        const bg = databases.get(precomputedBackground)
+
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 'inputData': fileStats, 'bg': precomputedBackground })
+            body: JSON.stringify({ 'inputData': fileStats, 'bg': bg })
         })
         let json = await res.json();
         const genes = json.map(item => item.gene)
@@ -119,7 +121,7 @@ export default function Page() {
                 membraneGenes: membraneGenes,
                 secretedGenes: secretedGenes,
                 fileName: fileName,
-                precomputedBackground: databases.get(precomputedBackground),
+                precomputedBackground: bg,
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -130,22 +132,10 @@ export default function Page() {
         })
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
 
-
-    const handleFileRead =  useCallback((e) => {
-       
-        var geneStats;
-        var geneCounts;
-        const content = fileReader.current.result;
-
-        var rows = content.split('\n')
-        if (rows[1].includes(',')) {
-            rows = rows.map(row => row.split(','))
-        } else {
-            rows = rows.map(row => row.split('\t'))
-        }
+    const calcFileStats = useCallback((rows) => {
         var n = rows[0].length - 1
-        geneCounts = {}
-        geneStats = {}
+        var geneCounts = {}
+        var geneStats = {}
         var gene;
         var data;
         var stats;
@@ -158,12 +148,29 @@ export default function Page() {
                     gene = gene.split('.')[0]
                 }
                 var convertedSymbol = conversionDict[gene];
-                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0]};
+                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
                 geneCounts[convertedSymbol] = data.map(x => parseInt(x));
             }
         }
-        submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats, fileReader]);
+        if (precomputedBackground < 4) {
+            submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
+        }
+    }, [submitGeneStats, precomputedBackground])
+
+
+    const handleFileRead = useCallback((e) => {
+
+        const content = fileReader.current.result;
+
+        var rows = content.split('\n')
+        if (rows[1].includes(',')) {
+            rows = rows.map(row => row.split(','))
+        } else {
+            rows = rows.map(row => row.split('\t'))
+        }
+        calcFileStats(rows);
+    }, [fileReader, calcFileStats]);
+
 
     const handleFileChosen = useCallback((file) => {
         fileReader.current = new FileReader();
@@ -328,7 +335,9 @@ export default function Page() {
                                         </div>
                                     </div>
                                     <div>Chosen file:</div>
-                                    <div>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
+                                   
+                                        <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
+                                        {/* {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)} */}
 
                                 </div>
 

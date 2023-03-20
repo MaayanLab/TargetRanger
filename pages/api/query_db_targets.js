@@ -15,21 +15,9 @@ export default async function handler(req, res) {
         
         const input = req.body;
 
-        const databases = new Map([
-            [0, 'ARCHS4'],
-            [1, 'GTEx_transcriptomics'],
-            [2, 'Tabula_Sapiens'],
-            [3, 'CCLE_transcriptomics'],
-            [4, 'HPM'],
-            [5, 'HPA'],
-            [6, 'GTEx_proteomics'],
-            [7, 'CCLE_proteomics'],
-        ]);
-
         const input_data = input['inputData']
 
-        const bgNum = input['bg']
-        const bg = databases.get(bgNum)
+        const bg = input['bg']
         
         let result = await prisma.$queryRaw
         `

@@ -23,8 +23,8 @@ export async function getStaticProps() {
       },
     });
 
-    spec.paths['/api/data'].get.tags = ['data'];
-    spec.paths['/api/data'].post.tags = ['data'];
+
+    spec.paths['/api/query_db_targets'].post.tags = ['query_db_targets'];
   
     return {
       props: {
