@@ -8,6 +8,8 @@ import Head from '../components/head';
 import SideBar from '../components/sideBar';
 import exampleData from '../public/files/GSE49155.json';
 import exampleCounts from '../public/files/GSE49155-counts.json';
+import exampleDataTranscript from '../public/files/GSE49155-transcript.json';
+import exampleCountsTranscript from '../public/files/GSE49155-counts-transcript.json';
 import conversionDict from '../public/files/conversion_dict.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -66,6 +68,8 @@ const databases = new Map([
     [0, 'ARCHS4'],
     [1, 'GTEx_transcriptomics'],
     [2, 'Tabula_Sapiens'],
+    [3, 'ARCHS4_transcript'],
+    [4, 'GTEx_transcript'],
 ]);
 
 
@@ -80,6 +84,7 @@ export default function Page() {
     const [useDefaultFile, setUseDefaultFile] = React.useState(false);
     const [alert, setAlert] = React.useState('')
     const [fileName, setFileName] = React.useState('')
+    const [level, setLevel] = React.useState(true)
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
     const [secretedGenes, setSecretedGenes] = React.useState(false);
@@ -98,22 +103,37 @@ export default function Page() {
 
         const bg = databases.get(precomputedBackground)
 
+        var inputData = { 'inputData': fileStats, 'bg': bg }
+        if (!level) {
+            inputData['transcript'] = true;
+        }
+
+        console.log(inputData['transcript'])
+
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 'inputData': fileStats, 'bg': bg })
+            body: JSON.stringify(inputData)
         })
         let json = await res.json();
-        const genes = json.map(item => item.gene)
-        const genesIncluded = Object.keys(fileStats['genes'])
-        var targetStats = {}
-        for (let i = 0; i < genes.length; i++) {
-            if (genesIncluded.includes(genes[i])) targetStats[genes[i]] = geneCounts[genes[i]]
+        var targets = [];
+        var included = [];
+        if (level) {
+            targets = json.map(item => item.gene)
+            const included = Object.keys(fileStats['genes'])
+        } else {
+            targets = json.map(item => item.transcript)
+            const included = Object.keys(fileStats['transcripts'])
         }
-        console.log(fileName)
-        let href = {
+        var targetStats = {}
+        for (let i = 0; i < targets.length; i++) {
+            if (included.includes(targets[i])) targetStats[targets[i]] = geneCounts[targets[i]]
+        }
+        console.log(json)
+        setLoading(false)
+        /* let href = {
             pathname: "/targetscreenerresults",
             query: {
                 res: JSON.stringify(json),
@@ -129,7 +149,7 @@ export default function Page() {
         }).catch(() => {
             setLoading(false)
             alert('Error with returned data')
-        })
+        }) */
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
 
     const calcFileStats = useCallback((rows) => {
@@ -144,7 +164,7 @@ export default function Page() {
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                if (gene.includes('.')) {
+                if (gene.includes('.') && level) {
                     gene = gene.split('.')[0]
                 }
                 var convertedSymbol = conversionDict[gene];
@@ -152,10 +172,9 @@ export default function Page() {
                 geneCounts[convertedSymbol] = data.map(x => parseInt(x));
             }
         }
-        if (precomputedBackground < 4) {
-            submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-        }
-    }, [submitGeneStats, precomputedBackground])
+        
+        submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
+    }, [submitGeneStats])
 
 
     const handleFileRead = useCallback((e) => {
@@ -183,7 +202,9 @@ export default function Page() {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
-                submitGeneStats(exampleData, exampleCounts)
+                if (level) {
+                    submitGeneStats(exampleData, exampleCounts)
+                } else submitGeneStats(exampleDataTranscript, exampleCountsTranscript)
             } else {
                 setLoading(true);
                 handleFileChosen(file)
@@ -231,7 +252,7 @@ export default function Page() {
                             sx={{ width: '375px', height: '100%' }}
                             className={styles.panel}
                         >
-                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} level={level}/>
                         </Box>
                     </div>
                     <div className={styles.drawerButton}>
@@ -245,7 +266,7 @@ export default function Page() {
                                 sx={{ width: '375px', height: '100%' }}
                                 className={styles.drawer}
                             >
-                                <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                                <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} level={level}/>
                             </Box>
                         </Drawer>
                     </div>
@@ -347,10 +368,28 @@ export default function Page() {
 
                                 <div className={styles.verticalFlexbox}>
 
+
                                     <div className={styles.verticalFlexbox}>
                                         <div>Normal tissue background:</div>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={level}
+                                            exclusive
+                                            onChange={(event, newValue) => { 
+                                                if (newValue !== null) 
+                                                    setLevel(newValue)
+                                                    if (newValue)
+                                                        setPrecomputedBackground(0)
+                                                    else setPrecomputedBackground(3)
+                                                }
+                                            }
+                                        >
+                                            <ToggleButton value={true}>Gene</ToggleButton>
+                                            <ToggleButton value={false}>Transcript</ToggleButton>
+                                        </ToggleButtonGroup>
 
                                         <div className={styles.horizontalFlexbox}>
+                                            {level ?
                                             <Box sx={{ width: 390 }}>
                                                 <FormControl fullWidth>
                                                     <Select
@@ -358,12 +397,25 @@ export default function Page() {
                                                         value={precomputedBackground}
                                                         onChange={(event) => setPrecomputedBackground(event.target.value)}
                                                     >
-                                                        <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq)</MenuItem>
-                                                        <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq)</MenuItem>
-                                                        <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq)</MenuItem>
+                                                        <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq) - Gene</MenuItem>
+                                                        <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq) - Gene</MenuItem>
+                                                        <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq) - Gene</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Box> :
+                                            <Box sx={{ width: 390 }}>
+                                                <FormControl fullWidth>
+                                                    <Select
+                                                        color="secondary"
+                                                        value={precomputedBackground}
+                                                        onChange={(event) => setPrecomputedBackground(event.target.value)}
+                                                    >
+                                                        <MenuItem color="secondary" value={3}>ARCHS4 (bulk RNA-seq) - Transcript</MenuItem>
+                                                        <MenuItem color="secondary" value={4}>GTEx (bulk RNA-seq) - Transcript</MenuItem>
                                                     </Select>
                                                 </FormControl>
                                             </Box>
+                                            }
                                         </div>
                                     </div>
                                     <div className={styles.horizontalFlexbox} style={{justifyItems: 'left'}}>
