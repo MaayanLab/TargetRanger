@@ -133,7 +133,7 @@ export default function Page() {
         }
         console.log(json)
         setLoading(false)
-        /* let href = {
+        let href = {
             pathname: "/targetscreenerresults",
             query: {
                 res: JSON.stringify(json),
@@ -149,7 +149,7 @@ export default function Page() {
         }).catch(() => {
             setLoading(false)
             alert('Error with returned data')
-        }) */
+        })
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
 
     const calcFileStats = useCallback((rows) => {
