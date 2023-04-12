@@ -155,7 +155,7 @@ export default function Page() {
             setLoading(false)
             alert('Error with returned data')
         })
-    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
+    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName, level])
 
     const calcFileStats = useCallback((rows) => {
         var n = rows[0].length - 1
@@ -228,7 +228,7 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }, [file, runtimeConfig, handleFileChosen, submitGeneStats, calcFileStats, useDefaultFile]);
+    }, [file, handleFileChosen, submitGeneStats, useDefaultFile, level]);
 
     // For input file example table
     const rows = [
@@ -248,7 +248,7 @@ export default function Page() {
                 setFileLoading(false)
             }, 3000)
         }
-    }, [fileLoading])
+    }, [fileLoading, file, useDefaultFile])
 
     // For MUI Popover
 

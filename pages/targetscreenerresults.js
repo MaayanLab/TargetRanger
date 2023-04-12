@@ -66,6 +66,8 @@ export default function Results() {
   // Get results list of differentially expressed genes and create array for autocomplete
 
   var targetList;
+  var geneFirst = '';
+  var transcriptFirst= '';
   var targetMap = {};
   if (!results) {
     targetList = ['']
@@ -74,11 +76,15 @@ export default function Results() {
     if (transcript_level) {
       targetList = results.map(x => x.transcript)
       results.map(x => targetMap[x.transcript] = x.gene)
+      transcriptFirst = targetList[0]
+      geneFirst = targetMap[transcriptFirst]
+    } else {
+      geneFirst = targetList[0]
     }
   } 
 
-  const [gene, setGene] = useState(results[0].gene)
-  const [transcript, setTranscript] = useState(results[0].transcript)
+  const [gene, setGene] = useState(geneFirst)
+  const [transcript, setTranscript] = useState(transcriptFirst)
   const [transcriptExpression, setTranscriptExpression] = useState(transcript_level)
 
 
@@ -105,7 +111,7 @@ export default function Results() {
       const json = await res.json()
       setTabsData(json)
     }
-  }, [runtimeConfig, transcriptExpression, gene, setTabsData]);
+  }, [runtimeConfig, transcriptExpression, gene, transcript, setTabsData]);
 
   useEffect(() => {
     // call the function
