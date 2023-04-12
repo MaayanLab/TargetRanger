@@ -236,7 +236,7 @@ ingest/ARCHS4_transcript.sql: input/archs4-transcript-stats-clean.tsv.gz
 	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@ -m
 
 .PHONY: ingest
-ingest: ingest/gene_info ingest/ARCHS4 ingest/GTEx_transcriptomics ingest/Tabula_Sapiens ingest/HPM ingest/HPA ingest/GTEx_proteomics ingest/CCLE_Transcriptomics ingest/CCLE_Proteomics ingest/GTEx_transcript.sql ingest/ARCHS4_transcript.sql
+ingest: ingest/gene_info ingest/ARCHS4 ingest/GTEx_transcriptomics ingest/Tabula_Sapiens ingest/HPM ingest/HPA ingest/GTEx_proteomics ingest/CCLE_Transcriptomics ingest/CCLE_Proteomics ingest/GTEx_transcript ingest/ARCHS4_transcript
 
 # MISC
 

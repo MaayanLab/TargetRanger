@@ -25,11 +25,10 @@ export default function DbTabsViewer(props) {
     var gene = props.gene
     var transcript_level = props.transcript_level
 
-    console.log(gene)
     var gene_data = {
         type: 'box',
         x: geneStats[gene],
-        y: 'Expression in submitted file',
+        name: 'input vector',
         boxmean: 'sd',
     }
 

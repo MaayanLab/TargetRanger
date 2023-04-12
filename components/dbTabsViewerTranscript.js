@@ -28,7 +28,7 @@ export default function DbTabsViewer(props) {
     var transcript_data = {
         type: 'box',
         x: transcriptStats[transcript],
-        y: 'Expression in submitted file',
+        name: 'input vector',
         boxmean: 'sd',
     }
 
