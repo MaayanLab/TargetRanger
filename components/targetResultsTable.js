@@ -16,10 +16,12 @@ export default function TargetResultTable(props) {
     const filt = props.filt;
     const setFilt = props.setFilt;
     const setGene = props.setgene;
+    const setTranscript = props.settranscript;
     const fname = props.fname;
+    const transcript_level = props.transcript_level;
     var columns = [];
 
-    if ('transcript' in results[0]) {
+    if (transcript_level) {
       columns = [
         { field: "transcript", headerName: "Target", minWidth: 200, flex: 1},
         { field: "gene", headerName: "gene symbol", minWidth: 100, flex: 1},
@@ -36,30 +38,36 @@ export default function TargetResultTable(props) {
           flex: 1,
           minWidth: 265,
           renderCell: (params) => {
+            const onClickENSEMBL = (e) => {
+              e.stopPropagation(); // don't select this row after clicking
+              window.open(`https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t=${params.row.transcript}`, '_blank', 'noreferrer');
+            };
             const onClickARCHS4 = (e) => {
               e.stopPropagation(); // don't select this row after clicking
-      
-              window.open(`https://maayanlab.cloud/archs4/gene/${params.id}`, '_blank', 'noreferrer');
+              window.open(`https://maayanlab.cloud/archs4/gene/${params.row.gene}`, '_blank', 'noreferrer');
             };
             const onClickHARMONIZOME = (e) => {
               e.stopPropagation();
       
-              window.open(`https://maayanlab.cloud/Harmonizome/gene/${params.id}`);
+              window.open(`https://maayanlab.cloud/Harmonizome/gene/${params.row.gene}`);
             };
             const onClickGDLPA = (e) => {
               e.stopPropagation();
       
-              window.open(`https://cfde-gene-pages.cloud/gene/${params.id}?CF=false&PS=true&Ag=true&gene=false&variant=false`, '_blank', 'noreferrer');
+              window.open(`https://cfde-gene-pages.cloud/gene/${params.row.gene}?CF=false&PS=true&Ag=true&gene=false&variant=false`, '_blank', 'noreferrer');
             };
 
             const onClickPrismEXP = (e) => {
               e.stopPropagation();
       
-              window.open(`https://maayanlab.cloud/prismexp/g/${params.id}`, '_blank', 'noreferrer');
+              window.open(`https://maayanlab.cloud/prismexp/g/${params.row.gene}`, '_blank', 'noreferrer');
             };
       
             return (
               <div className={styles.horizontalFlexbox} style={{gap: '0px', padding: '0px'}}>
+                  <Tooltip title="Open in Ensembl">
+                      <Button onClick={onClickENSEMBL}><img style={{width: '20px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/ensembl.png"} alt="archs4 Logo"/></Button>
+                  </Tooltip>
                   <Tooltip title="Open in ARCHS4">
                       <Button onClick={onClickARCHS4}><img style={{width: '40px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} alt="archs4 Logo"/></Button>
                   </Tooltip>
@@ -99,24 +107,24 @@ export default function TargetResultTable(props) {
               renderCell: (params) => {
                 const onClickARCHS4 = (e) => {
                   e.stopPropagation(); // don't select this row after clicking
-          
-                  window.open(`https://maayanlab.cloud/archs4/gene/${params.id}`, '_blank', 'noreferrer');
+                  
+                  window.open(`https://maayanlab.cloud/archs4/gene/${params.row.gene}`, '_blank', 'noreferrer');
                 };
                 const onClickHARMONIZOME = (e) => {
                   e.stopPropagation();
           
-                  window.open(`https://maayanlab.cloud/Harmonizome/gene/${params.id}`);
+                  window.open(`https://maayanlab.cloud/Harmonizome/gene/${params.row.gene}`);
                 };
                 const onClickGDLPA = (e) => {
                   e.stopPropagation();
           
-                  window.open(`https://cfde-gene-pages.cloud/gene/${params.id}?CF=false&PS=true&Ag=true&gene=false&variant=false`, '_blank', 'noreferrer');
+                  window.open(`https://cfde-gene-pages.cloud/gene/${params.row.gene}?CF=false&PS=true&Ag=true&gene=false&variant=false`, '_blank', 'noreferrer');
                 };
 
                 const onClickPrismEXP = (e) => {
                   e.stopPropagation();
           
-                  window.open(`https://maayanlab.cloud/prismexp/g/${params.id}`, '_blank', 'noreferrer');
+                  window.open(`https://maayanlab.cloud/prismexp/g/${params.row.gene}`, '_blank', 'noreferrer');
                 };
           
                 return (
@@ -190,7 +198,14 @@ export default function TargetResultTable(props) {
                  setFilt(newFilterModel)
                 }
                 onSelectionModelChange={(newSelection) => {
-                    setGene(newSelection[0])
+                  const selectedRowData = results.filter((row) =>
+                    newSelection.toString() == row.id.toString()
+                  )
+                  console.log(selectedRowData);
+                  setGene(selectedRowData[0]['gene'])
+                  if (transcript_level) {
+                    setTranscript(selectedRowData[0]['transcript'])
+                  }
                 }}
                 components={{
                   Toolbar: CustomToolbar,

@@ -33,6 +33,12 @@
   padding-bottom: 15px;
 }
 
+.text {
+  text-align: center;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
 .formItem {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -139,6 +145,15 @@
 
 .grayTabLogo {
   width: 100%;
+  opacity: 0.25;
+}
+
+.tabLogoTranscript {
+  width: 25%;
+}
+
+.grayTabLogoTranscript {
+  width: 25%;
   opacity: 0.25;
 }
 

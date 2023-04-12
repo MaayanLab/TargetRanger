@@ -107,9 +107,7 @@ export default function Page() {
         if (!level) {
             inputData['transcript'] = true;
         }
-
-        console.log(inputData['transcript'])
-
+        console.log(inputData)
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
@@ -122,16 +120,15 @@ export default function Page() {
         var included = [];
         if (level) {
             targets = json.map(item => item.gene)
-            const included = Object.keys(fileStats['genes'])
+            included = Object.keys(fileStats['genes'])
         } else {
             targets = json.map(item => item.transcript)
-            const included = Object.keys(fileStats['transcripts'])
+            included = Object.keys(fileStats['transcripts'])
         }
         var targetStats = {}
         for (let i = 0; i < targets.length; i++) {
             if (included.includes(targets[i])) targetStats[targets[i]] = geneCounts[targets[i]]
         }
-        console.log(json)
         setLoading(false)
         let href = {
             pathname: "/targetscreenerresults",
@@ -142,6 +139,7 @@ export default function Page() {
                 secretedGenes: secretedGenes,
                 fileName: fileName,
                 precomputedBackground: bg,
+                transcript_level: !level,
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -160,21 +158,29 @@ export default function Page() {
         var data;
         var stats;
         for (let i = 1; i < rows.length; i++) {
-            gene = rows[i].slice(0, 1)
+            gene = rows[i].slice(0, 1)[0]
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                if (gene.includes('.') && level) {
+                if (gene.includes('.')) {
                     gene = gene.split('.')[0]
                 }
-                var convertedSymbol = conversionDict[gene];
-                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
-                geneCounts[convertedSymbol] = data.map(x => parseInt(x));
+                if (level) {
+                    var convertedSymbol = conversionDict[gene];
+                    geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
+                    geneCounts[convertedSymbol] = data.map(x => parseInt(x));
+                } else {
+                    geneStats[gene] = { 'std': stats[1], 'mean': stats[0] };
+                    geneCounts[gene] = data.map(x => parseInt(x));
+                }
             }
         }
-        
+        if (level) {
         submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats])
+        } else {
+            submitGeneStats({ 'transcripts': geneStats, 'n': n }, geneCounts)
+        }
+    }, [submitGeneStats, level])
 
 
     const handleFileRead = useCallback((e) => {
@@ -298,7 +304,8 @@ export default function Page() {
                                                 <Button onClick={() => {setUseDefaultFile(true); setFileName('GSE49155-P4T')}} className={styles.darkOnHover} variant="text" color="secondary">
                                                     Load example file
                                                 </Button>
-                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
+                                                
+                                                <a style={{ textDecoration: 'none' }} href={level ? "files/GSE49155-patient.tsv" : "files/GSE49155-patient-transcript.tsv"} download={level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv"}>
                                                     <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
                                                         Download example file
                                                     </Button>
@@ -357,7 +364,7 @@ export default function Page() {
                                     </div>
                                     <div>Chosen file:</div>
                                    
-                                        <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
+                                        <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv" : file.name}</div>
                                         {/* {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)} */}
 
                                 </div>

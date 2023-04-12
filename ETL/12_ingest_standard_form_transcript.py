@@ -24,39 +24,20 @@ def load_standard(con, df, name, migration=None):
   # [(gene, label), description] => [gene, (description, label)]
   df = df.unstack('label')
 
-  df_transcript_gene_map = pd.read_csv("s3://storage/Tumor_Gene_Target_Screener/transcript-gene-map.tsv.gz", storage_options=dict(client_kwargs=dict(endpoint_url="https://appyters.maayanlab.cloud"), anon=True), sep='\t', header=0, compression='gzip')
+  # step 1 create mapping of transcript versions to stable ids
+  transcript_versions = {}
+  for t in df.index:
+    t_stable = t.split('.')[0]
+    if t_stable not in transcript_versions:
+      transcript_versions[t_stable] = []
+    transcript_versions[t_stable].append(t)
 
-  mapping_transcript_gene = {}
-  for row in df_transcript_gene_map.iterrows():
-    mapping_transcript_gene[row[1]['ensembl_transcript_id']] = row[1]['gene_symbol']
-  
-  # map our genes with aggregation
-  #  step 1 { current_gene: mapped_gene, ... }
-  gene_mapping = {transcript: mapping_transcript_gene[transcript.split('.')[0]] if transcript.split('.')[0] in mapping_transcript_gene else 'missing' for transcript in df.index}
-
-  #  step 2 { mapped_gene: [current_gene, ...] }
-  gene_mapping_inv = {}
-  for transcript, gene in gene_mapping.items():
-    if transcript not in gene_mapping_inv: gene_mapping_inv[transcript] = []
-    gene_mapping_inv[transcript].append(gene)
-
-  #  step 3 reconstruct df, aggregating & renaming columns
+  #  step 2 reconstruct df, calculating statistics
   mapped = {} # { mapped_gene: new_d }
-  for transcript, genes in tqdm(gene_mapping_inv.items(), desc='Augmenting'):
-    if 'value' in df.columns.get_level_values('label'):
-      # qualitative
-      if len(genes) == 1:
-        gene, = genes
-        new_d = df.loc[gene, :].unstack('label')
-      else:
-        # TODO: come up with better agg scheme for qualitative data
-        new_d = df.loc[genes[0], :].unstack('label')
-      mapped[transcript] = new_d.stack('label')
-    else:
-      # quantitative
-      if len(genes) == 1:
-        gene, = genes
-        new_d = df.loc[transcript, :].unstack('label')
+  for transcript, versions in tqdm(transcript_versions.items(), desc='Augmenting'):
+      if len(versions) == 1:
+        transcript_v, = versions
+        new_d = df.loc[transcript_v, :].unstack('label')
         new_d.rename({
           '25%': 'q1',
           '50%': 'median',
@@ -64,7 +45,7 @@ def load_standard(con, df, name, migration=None):
         }, axis=1, inplace=True)
       else:
         # [gene, (description, label)] => [gene, (label, description)]
-        d = df.loc[transcript, :].stack('description').unstack('description')
+        d = df.loc[versions, :].stack('description').unstack('description')
         # d[label] results in [gene, description]
         new_d = pd.DataFrame({
           'min': d['min'].min(),
@@ -76,7 +57,7 @@ def load_standard(con, df, name, migration=None):
           'q3': (d['75%'] * d['count']).sum() / d['count'].sum(),
           'mean': (d['mean'] * d['count']).sum() / d['count'].sum(),
         })
-        new_d.columns.name = 'label'
+      new_d.columns.name = 'label'
       IRQ = new_d['q3'] - new_d['q1']
       new_d['lowerfence'] = np.maximum(new_d['q1'] - 1.5*IRQ, new_d['min'])
       new_d['upperfence'] = np.minimum(new_d['q3'] + 1.5*IRQ, new_d['max'])
@@ -94,7 +75,7 @@ def load_standard(con, df, name, migration=None):
   # here we add only "new" transcripts
   copy_from_records(con, 'transcript', ('transcript',), (
     dict(transcript=transcript)
-    for transcript in (gene_mapping.keys() - existing_transcripts)
+    for transcript in (set(df.index) - existing_transcripts)
   ), migration=migration)
 
   # obtain now-complete transcript lookup from transcript symbol to db id
@@ -138,26 +119,28 @@ def load_standard(con, df, name, migration=None):
     transcripts_mapped = [transcript[0] for transcript in cur.fetchall()]
 
 
-  df_transcript_gene_map = pd.read_csv("s3://storage/Tumor_Gene_Target_Screener/transcript-gene-map.tsv.gz", storage_options=dict(client_kwargs=dict(endpoint_url="https://appyters.maayanlab.cloud"), anon=True), sep='\t', header=0, compression='gzip')
-  df_transcript_gene_map.dropna(inplace=True)
-  gene_transcript_mapping = {}
+  df_transcript_gene_map = pd.read_csv("s3://storage/Tumor_Gene_Target_Screener/genes-transcript-mapping.tsv", storage_options=dict(client_kwargs=dict(endpoint_url="https://appyters.maayanlab.cloud"), anon=True), sep='\t', header=0)
+  gene_transcript_mapping = []
+  genes_set = set()
 
   unmapped = set(transcript_lookup.keys()).difference(set(transcripts_mapped))
   for t in tqdm(unmapped):
     if transcript_lookup[t] not in transcripts_mapped:
-      t_split = t.split('.')[0]
-      g = df_transcript_gene_map[df_transcript_gene_map['ensembl_transcript_id'] == t_split]['gene_symbol'].values
-      if len(g) > 0:
-          gene_transcript_mapping[g[0]] = t
-      else:
-        gene_transcript_mapping['missing'] = t
+      g_row = df_transcript_gene_map[df_transcript_gene_map['Transcript stable ID'] == t]
+      g = g_row['Gene name'].values
+      g_ensem = g_row['Gene stable ID'].values
+      if len(g) > 0  and not pd.isna(g[0]):
+        gene_transcript_mapping.append([g[0], t])
+        genes_set.add(g[0])
+      elif len(g_ensem) > 0:
+        gene_transcript_mapping.append([g_ensem[0], t])
+        genes_set.add(g_ensem[0])
 
 
   copy_from_records(con, 'gene', ('gene',), (
   dict(gene=gene)
-  for gene in (set(gene_transcript_mapping.keys()).difference(set(gene_lookup.keys())))
+  for gene in genes_set.difference(set(gene_lookup.keys()))
   ), migration=migration)
-
 
   # collect complete genes/ids
   with con.cursor() as cur:
@@ -167,12 +150,12 @@ def load_standard(con, df, name, migration=None):
   # write data associating entry with the database id
   copy_from_records(con, 'gene_transcript', ('gene', 'transcript'), (
     dict(
-      gene=gene_lookup[gene],
-      transcript=transcript_lookup[transcript],
+      gene=gene_lookup[mapping[0]],
+      transcript=transcript_lookup[mapping[1]],
       # We move description to the index [label, description]
       #  the json will thus be of the form { label: { description: value, ... }, ... }
     )
-    for gene, transcript in tqdm(gene_transcript_mapping.items(), total=len(gene_transcript_mapping), desc='Uploading') # progress bar
+    for mapping in tqdm(gene_transcript_mapping, total=len(gene_transcript_mapping), desc='Uploading') # progress bar
   ), migration=migration)
 
   return database_id
