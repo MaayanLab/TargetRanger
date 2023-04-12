@@ -13,7 +13,20 @@
     justify-content: center;
     /* flex-wrap: wrap; */
     align-items: center;
-    gap: 25px;
+    gap: 15px;
+  }
+
+  .horizontalFlexboxNoGap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .verticalFlexboxNoGap {
+    justify-content: center;
+    /* flex-wrap: wrap; */
+    align-items: center;
+    text-align: center;
   }
 
   .rowFlexbox {
@@ -30,11 +43,15 @@
     justify-content: center;
     /* flex-wrap: wrap; */
     align-items: center;
-    gap: 25px;
+    gap: 15px;
   }
 
   .darkOnHover:hover {
     background-color: #9ebfd7;
+  }
+
+  .darkOnHover {
+    gap: 0px;
   }
 
   .textDiv {

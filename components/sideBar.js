@@ -75,8 +75,16 @@ export default function SideBar(props) {
 
     var database = props.database;
     const setDatabase = props.setdatabase;
+    const level = props.level;
 
     // For MUI Drawer
+    var db1 = 0;
+    var db2 = 1;
+
+    if (!level) {
+        db1 = 3
+        db2 = 4
+    }
 
 
 
@@ -100,7 +108,8 @@ export default function SideBar(props) {
 
                                         <FormControlLabel
                                             className={styles.formItem}
-                                            control={<Switch onChange={() => { setDatabase(0) }} checked={database == 0} />}
+                                            control={<Switch onChange={() => { setDatabase(db1) }} 
+                                            checked={database == db1} />}
                                             label={
                                                 <div className={styles.dbLogo}>
                                                     <img className={styles.databaseLogo} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/archs4.png"} alt="archs4 Logo" />
@@ -116,7 +125,7 @@ export default function SideBar(props) {
 
                                         <FormControlLabel
                                             className={styles.formItem}
-                                            control={<Switch onChange={() => { setDatabase(1) }} checked={database == 1} />}
+                                            control={<Switch onChange={() => { setDatabase(db2) }} checked={database == db2} />}
                                             label={
                                                 <div className={styles.dbLogo}>
                                                     <img className={styles.databaseLogo} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GTEx_transcriptomics.png"} alt="GTEx Logo" />
@@ -131,7 +140,8 @@ export default function SideBar(props) {
                                         <div className={styles.logoDesc}>{GTEx_transcriptomics_desc}</div>
 
 
-
+                                        { level ?
+                                        <>
                                         <FormControlLabel
                                             className={styles.formItem}
                                             control={<Switch onChange={() => { setDatabase(2) }} checked={database == 2} />}
@@ -147,6 +157,10 @@ export default function SideBar(props) {
                                             labelPlacement="start" />
 
                                         <div className={styles.logoDesc}>{Tabula_Sapiens_desc}</div>
+                                        </>
+                                        :
+                                        <></>
+                                        }
 
                                         
 
@@ -165,6 +179,21 @@ export default function SideBar(props) {
                                         <h3 style={{ margin: '0', padding: '4', textAlign: 'center'}}>Additional Atlases</h3>
                                     </AccordionSummary>
                                     <AccordionDetails>
+                                            { !level ?
+                                                <>
+                                                <div className={styles.dbLogo}>
+                                                    <img className={styles.databaseLogo} style={{ borderRadius: '8px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/tabula_sapiens.png"} alt="Tabula Sapiens Logo" />
+                                                    <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={
+                                                        <div className={styles.tooltipText}><a href="https://tabula-sapiens-portal.ds.czbiohub.org" target="_blank" rel="noopener noreferrer">Website</a> <br /> <a href="https://pubmed.ncbi.nlm.nih.gov/35549404/" target="_blank" rel="noopener noreferrer">Citation</a></div>}>
+                                                        <IconButton><InfoIcon color='info' /></IconButton>
+                                                    </HtmlTooltip>
+                                                </div>
+                                                <div className={styles.logoDesc}>{Tabula_Sapiens_desc}</div>
+                                                </>
+                                                :
+                                                <></>
+                                            }
+
                                             <div className={styles.dbLogo}>
                                                 <img className={styles.databaseLogo} style={{ borderRadius: '3px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/CCLE_transcriptomics.jpeg"} alt="CCLE Logo" />
                                                 <HtmlTooltip enterTouchDelay={0} leaveTouchDelay={3000} arrow TransitionComponent={Zoom} placement="top" title={

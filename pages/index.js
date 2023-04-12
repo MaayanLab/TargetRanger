@@ -8,8 +8,9 @@ import Head from '../components/head';
 import SideBar from '../components/sideBar';
 import exampleData from '../public/files/GSE49155.json';
 import exampleCounts from '../public/files/GSE49155-counts.json';
+import exampleDataTranscript from '../public/files/GSE49155-transcript.json';
+import exampleCountsTranscript from '../public/files/GSE49155-counts-transcript.json';
 import conversionDict from '../public/files/conversion_dict.json'
-import datasets from '../public/files/datasets.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -30,17 +31,17 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 import Popover from '@mui/material/Popover';
 import Card from '@mui/material/Card';
-import ListSubheader from '@mui/material/ListSubheader';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
 import { Drawer } from '@mui/material';
-import LinearProgress from '@mui/material/LinearProgress';
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import { useCallback } from 'react';
+import { IconButton, LinearProgress } from '@mui/material';
 
 
 function stddev(arr) {
@@ -69,8 +70,8 @@ const databases = new Map([
     [0, 'ARCHS4'],
     [1, 'GTEx_transcriptomics'],
     [2, 'Tabula_Sapiens'],
-    [4, 'ARCHS4_cell_lines'],
-    [5, 'CCLE_transcriptomics'],
+    [3, 'ARCHS4_transcript'],
+    [4, 'GTEx_transcript'],
 ]);
 
 
@@ -84,12 +85,13 @@ export default function Page() {
 
     // For MUI loading icon
 
-    const [loading, setLoading] = useState(false);
-    const [file, setFile] = useState(null);
-    const [useDefaultFile, setUseDefaultFile] = useState(false);
-    const [alert, setAlert] = useState('')
-    const [fileLoading, setFileLoading] = useState(false)
-    const [fileName, setFileName] = useState('')
+    const [loading, setLoading] = React.useState(false);
+    const [file, setFile] = React.useState(null);
+    const [useDefaultFile, setUseDefaultFile] = React.useState(false);
+    const [alert, setAlert] = React.useState('')
+    const [fileName, setFileName] = React.useState('')
+    const [level, setLevel] = React.useState(true)
+    const [fileLoading, setFileLoading] = React.useState(false)
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
     const [secretedGenes, setSecretedGenes] = React.useState(false);
@@ -108,20 +110,33 @@ export default function Page() {
 
         const bg = databases.get(precomputedBackground)
 
+        var inputData = { 'inputData': fileStats, 'bg': bg }
+        if (!level) {
+            inputData['transcript'] = true;
+        }
+        console.log(inputData)
         let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 'inputData': fileStats, 'bg': bg })
+            body: JSON.stringify(inputData)
         })
         let json = await res.json();
-        const genes = json.map(item => item.gene)
-        const genesIncluded = Object.keys(fileStats['genes'])
-        var targetStats = {}
-        for (let i = 0; i < genes.length; i++) {
-            if (genesIncluded.includes(genes[i])) targetStats[genes[i]] = geneCounts[genes[i]]
+        var targets = [];
+        var included = [];
+        if (level) {
+            targets = json.map(item => item.gene)
+            included = Object.keys(fileStats['genes'])
+        } else {
+            targets = json.map(item => item.transcript)
+            included = Object.keys(fileStats['transcripts'])
         }
+        var targetStats = {}
+        for (let i = 0; i < targets.length; i++) {
+            if (included.includes(targets[i])) targetStats[targets[i]] = geneCounts[targets[i]]
+        }
+        setLoading(false)
         let href = {
             pathname: "/targetscreenerresults",
             query: {
@@ -131,6 +146,7 @@ export default function Page() {
                 secretedGenes: secretedGenes,
                 fileName: fileName,
                 precomputedBackground: bg,
+                transcript_level: !level,
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -149,22 +165,29 @@ export default function Page() {
         var data;
         var stats;
         for (let i = 1; i < rows.length; i++) {
-            gene = rows[i].slice(0, 1)
+            gene = rows[i].slice(0, 1)[0]
             data = rows[i].slice(1, rows.legnth)
             stats = stddev(data)
             if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
                 if (gene.includes('.')) {
                     gene = gene.split('.')[0]
                 }
-                var convertedSymbol = conversionDict[gene];
-                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
-                geneCounts[convertedSymbol] = data.map(x => parseInt(x));
+                if (level) {
+                    var convertedSymbol = conversionDict[gene];
+                    geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
+                    geneCounts[convertedSymbol] = data.map(x => parseInt(x));
+                } else {
+                    geneStats[gene] = { 'std': stats[1], 'mean': stats[0] };
+                    geneCounts[gene] = data.map(x => parseInt(x));
+                }
             }
         }
-        if (precomputedBackground < 4) {
+        if (level) {
             submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
+        } else {
+            submitGeneStats({ 'transcripts': geneStats, 'n': n }, geneCounts)
         }
-    }, [submitGeneStats, precomputedBackground])
+    }, [submitGeneStats, level])
 
 
     const handleFileRead = useCallback((e) => {
@@ -192,7 +215,9 @@ export default function Page() {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
-                submitGeneStats(exampleData, exampleCounts)
+                if (level) {
+                    submitGeneStats(exampleData, exampleCounts)
+                } else submitGeneStats(exampleDataTranscript, exampleCountsTranscript)
             } else {
                 setLoading(true);
                 handleFileChosen(file)
@@ -213,9 +238,16 @@ export default function Page() {
     ];
 
     useEffect(() => {
-        setTimeout(() => {
-            setFileLoading(false);
-        }, 2000);
+        if (useDefaultFile) {
+            setTimeout(() => {
+                setFileLoading(false)
+            }, 2500)
+        }
+        if (file) {
+            setTimeout(() => {
+                setFileLoading(false)
+            }, 3000)
+        }
     }, [fileLoading])
 
     // For MUI Popover
@@ -242,7 +274,7 @@ export default function Page() {
                             sx={{ width: '375px', height: '100%' }}
                             className={styles.panel}
                         >
-                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                            <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} level={level} />
                         </Box>
                     </div>
                     <div className={styles.drawerButton}>
@@ -256,7 +288,7 @@ export default function Page() {
                                 sx={{ width: '375px', height: '100%' }}
                                 className={styles.drawer}
                             >
-                                <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} />
+                                <SideBar database={precomputedBackground} setdatabase={setPrecomputedBackground} level={level} />
                             </Box>
                         </Drawer>
                     </div>
@@ -267,100 +299,136 @@ export default function Page() {
 
                                 <div className={styles.verticalFlexbox}>
 
-
-
                                     <div className={styles.horizontalFlexbox}>
 
                                         <div className={styles.verticalFlexbox}>
                                             <div>Upload RNA-seq profiles from the cells that you wish to target and remove</div>
-                                            <input
-                                                style={{ display: "none" }}
-                                                id="fileUpload"
-                                                type="file"
-                                                onChange={(e) => { setFileLoading(true); setUseDefaultFile(false); setFile(e.target.files[0]); setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) }}
-                                            />
-                                            <label htmlFor="fileUpload">
-                                                <Button variant="contained" color="secondary" component="span">
-                                                    Upload File
+                                            <div className={styles.verticalFlexboxNoGap}>
+                                                <div className={styles.verticalFlexboxNoGap}>
+                                                    <div className={styles.horizontalFlexboxNoGap}>
+                                                        <input
+                                                            style={{ display: "none" }}
+                                                            id="fileUpload"
+                                                            type="file"
+                                                            onChange={(e) => { setFileLoading(true); setUseDefaultFile(false); setFile(e.target.files[0]); setFileName((e.target.files[0].name).replace('.csv', '').replace('.tsv', '').replace('.txt', '')) }}
+                                                        />
+                                                        <label htmlFor="fileUpload">
+                                                            <Button  sx={{ backgroundColor: "#DCDCDC", borderRadius: '0%', height: '42px', color: '#666666', borderColor: 'lightgrey', width: '140px'}} variant="outlined" color="secondary" component="span">
+                                                                Choose File
+                                                            </Button>
+                                                        </label>
+                                                        <Card variant="outlined" sx={{ backgroundColor: "#FAF9F6", borderRadius: '0%', height: '40px'  }}>
+                                                            <div style={{ margin: '10px' }} >
+                                                                <p style={{ textDecoration: 'none', fontSize: '16px', margin: '0px', marginTop: '5px', minWidth: '150px'}}>{file == null && useDefaultFile == false ? "" : useDefaultFile == true ? level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv" : file.name}</p>
+                                                            </div>
+                                                        </Card>
+                                                    </div>
+                                                    {fileLoading ? (<LinearProgress sx={{ margin: "2px" }} color='secondary'></LinearProgress>) : (<></>)}
+                                                </div>
+
+                                                <Button className={styles.darkOnHover} onClick={() => { setUseDefaultFile(true); setFileName('GSE49155-P4T'); setFileLoading(true) }} variant="text" color="secondary" endIcon={<UploadIcon />}>
+                                                    Example
                                                 </Button>
-                                            </label>
+                                            </div>
                                             <div className={styles.horizontalFlexbox}>
-                                                <Button onClick={() => { setUseDefaultFile(true); setFileLoading(<LinearProgress color="secondary" />); setFileName('GSE49155-P4T') }} className={styles.darkOnHover} variant="text" color="secondary">
-                                                    Load example file
+                                                <Button variant="contained" color="secondary" onClick={submitFile}>
+                                                    Upload
                                                 </Button>
-                                                <a style={{ textDecoration: 'none' }} href="files/GSE49155-patient.tsv" download="GSE49155-patient.tsv">
+                                                <Button onClick={() => { setUseDefaultFile(false); setFile(null); setFileName('') }} variant="outlined" component="span" color="secondary">
+                                                    Clear
+                                                </Button>
+                                            </div>
+                                            <div className={styles.horizontalFlexboxNoGap}>
+
+                                                <a style={{ textDecoration: 'none', gap: '0px' }} href={level ? "files/GSE49155-patient.tsv" : "files/GSE49155-patient-transcript.tsv"} download={level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv"}>
                                                     <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
-                                                        Download example file
+                                                        Example
                                                     </Button>
                                                 </a>
-                                            </div>
-                                            <Button className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" endIcon={<HelpOutlineIcon />}>
-                                                File specifications
-                                            </Button>
-                                            <Popover
-                                                open={Boolean(anchorEl)}
-                                                anchorEl={anchorEl}
-                                                onClose={() => { setAnchorEl(null) }}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'center',
-                                                }}
-                                                transformOrigin={{
-                                                    vertical: 'top',
-                                                    horizontal: 'center',
-                                                }}
-                                            >
-                                                <TableContainer component={Paper}>
-                                                    <Typography
-                                                        sx={{ textAlign: 'center' }}
-                                                        variant="h6"
-                                                    >
-                                                        File should be a tsv/csv of the following form:
-                                                    </Typography>
-                                                    <Table sx={{ width: 500 }} size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell></TableCell>
-                                                                <TableCell align="right"><b>Replicate 1</b></TableCell>
-                                                                <TableCell align="right"><b>Replicate 2</b></TableCell>
-                                                                <TableCell align="right"><b>...</b></TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {rows.map((row) => (
-                                                                <TableRow key={row.name}>
-                                                                    <TableCell><b>{row.name}</b></TableCell>
-                                                                    <TableCell align="right">{row.rep1}</TableCell>
-                                                                    <TableCell align="right">{row.rep2}</TableCell>
-                                                                    <TableCell align="right">{row.rep3}</TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                </TableContainer>
-                                            </Popover>
+                                                <IconButton className={styles.darkOnHover} onClick={(event) => { setAnchorEl(event.currentTarget) }} variant="text" color="secondary" size="small">
+                                                    <HelpOutlineIcon />
+                                                </IconButton>
 
-                                            <Button onClick={() => { setUseDefaultFile(false); setFile(null); setFileName('') }} variant="outlined" component="span" color="secondary">
-                                                Clear Chosen File
-                                            </Button>
+                                                <Popover
+                                                    open={Boolean(anchorEl)}
+                                                    anchorEl={anchorEl}
+                                                    onClose={() => { setAnchorEl(null) }}
+                                                    anchorOrigin={{
+                                                        vertical: 'bottom',
+                                                        horizontal: 'center',
+                                                    }}
+                                                    transformOrigin={{
+                                                        vertical: 'top',
+                                                        horizontal: 'center',
+                                                    }}
+                                                >
+                                                    <TableContainer component={Paper}>
+                                                        <Typography
+                                                            sx={{ textAlign: 'center' }}
+                                                            variant="h6"
+                                                        >
+                                                            File should be a tsv/csv of the following form:
+                                                        </Typography>
+                                                        <Table sx={{ width: 500 }} size="small">
+                                                            <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell></TableCell>
+                                                                    <TableCell align="right"><b>Replicate 1</b></TableCell>
+                                                                    <TableCell align="right"><b>Replicate 2</b></TableCell>
+                                                                    <TableCell align="right"><b>...</b></TableCell>
+                                                                </TableRow>
+                                                            </TableHead>
+                                                            <TableBody>
+                                                                {rows.map((row) => (
+                                                                    <TableRow key={row.name}>
+                                                                        <TableCell><b>{row.name}</b></TableCell>
+                                                                        <TableCell align="right">{row.rep1}</TableCell>
+                                                                        <TableCell align="right">{row.rep2}</TableCell>
+                                                                        <TableCell align="right">{row.rep3}</TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </TableContainer>
+                                                </Popover>
+                                            </div>
+
+
+
+
                                         </div>
                                     </div>
-                                    <div>Chosen file:</div>
-                                   
-                                        <div className={styles.fileText}>{file == null && useDefaultFile == false ? "None" : useDefaultFile == true ? "GSE49155-patient.tsv" : file.name}</div>
-                                        {/* {fileLoading ? (<LinearProgress color='secondary'></LinearProgress>) : (<></>)} */}
+
+
+
 
                                 </div>
 
 
                                 <div className={styles.verticalFlexbox}>
 
+
                                     <div className={styles.verticalFlexbox}>
+                                        <div>Normal tissue background:</div>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={level}
+                                            exclusive
+                                            onChange={(event, newValue) => {
+                                                if (newValue !== null)
+                                                    setLevel(newValue)
+                                                if (newValue)
+                                                    setPrecomputedBackground(0)
+                                                else setPrecomputedBackground(3)
+                                            }
+                                            }
+                                        >
+                                            <ToggleButton value={true}>Gene</ToggleButton>
+                                            <ToggleButton value={false}>Transcript</ToggleButton>
+                                        </ToggleButtonGroup>
 
-                                        <div className={styles.verticalFlexbox}>
-                                            <div>Normal tissue background:</div>
-
-                                            <div className={styles.horizontalFlexbox}>
+                                        <div className={styles.horizontalFlexbox}>
+                                            {level ?
                                                 <Box sx={{ width: 390 }}>
                                                     <FormControl fullWidth>
                                                         <Select
@@ -368,44 +436,55 @@ export default function Page() {
                                                             value={precomputedBackground}
                                                             onChange={(event) => setPrecomputedBackground(event.target.value)}
                                                         >
-                                                            <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq)</MenuItem>
-                                                            <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq)</MenuItem>
-                                                            <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq)</MenuItem>
+                                                            <MenuItem color="secondary" value={0}>ARCHS4 (bulk RNA-seq) - Gene</MenuItem>
+                                                            <MenuItem color="secondary" value={1}>GTEx (bulk RNA-seq) - Gene</MenuItem>
+                                                            <MenuItem color="secondary" value={2}>Tabula Sapiens (scRNA-seq) - Gene</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Box> :
+                                                <Box sx={{ width: 390 }}>
+                                                    <FormControl fullWidth>
+                                                        <Select
+                                                            color="secondary"
+                                                            value={precomputedBackground}
+                                                            onChange={(event) => setPrecomputedBackground(event.target.value)}
+                                                        >
+                                                            <MenuItem color="secondary" value={3}>ARCHS4 (bulk RNA-seq) - Transcript</MenuItem>
+                                                            <MenuItem color="secondary" value={4}>GTEx (bulk RNA-seq) - Transcript</MenuItem>
                                                         </Select>
                                                     </FormControl>
                                                 </Box>
-                                            </div>
+                                            }
                                         </div>
-                                        <div className={styles.horizontalFlexbox} style={{ justifyItems: 'left' }}>
-                                            <ToggleButtonGroup
-                                                color="secondary"
-                                                value={membraneGenes}
-                                                exclusive
-                                                onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue); if (newValue) setSecretedGenes(false) }}
-                                            >
-                                                <ToggleButton value={true}>Yes</ToggleButton>
-                                                <ToggleButton value={false}>No</ToggleButton>
-                                            </ToggleButtonGroup>
-                                            <div>Prioritize membrane genes</div>
-                                        </div>
-                                        <div className={styles.horizontalFlexbox} style={{ justifyContent: 'left' }}>
-                                            <ToggleButtonGroup
-                                                color="secondary"
-                                                value={secretedGenes}
-                                                exclusive
-                                                onChange={(event, newValue) => { if (newValue !== null) setSecretedGenes(newValue); if (newValue) setMembraneGenes(false) }}
-                                            >
-                                                <ToggleButton value={true}>Yes</ToggleButton>
-                                                <ToggleButton value={false}>No</ToggleButton>
-                                            </ToggleButtonGroup>
-                                            <div>Prioritize secreted genes</div>
-                                        </div>
+                                    </div>
+                                    <div className={styles.horizontalFlexbox} style={{ justifyItems: 'left' }}>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={membraneGenes}
+                                            exclusive
+                                            onChange={(event, newValue) => { if (newValue !== null) setMembraneGenes(newValue); if (newValue) setSecretedGenes(false) }}
+                                        >
+                                            <ToggleButton value={true}>Yes</ToggleButton>
+                                            <ToggleButton value={false}>No</ToggleButton>
+                                        </ToggleButtonGroup>
+                                        <div>Prioritize membrane genes</div>
+                                    </div>
+                                    <div className={styles.horizontalFlexbox} style={{ justifyContent: 'left' }}>
+                                        <ToggleButtonGroup
+                                            color="secondary"
+                                            value={secretedGenes}
+                                            exclusive
+                                            onChange={(event, newValue) => { if (newValue !== null) setSecretedGenes(newValue); if (newValue) setMembraneGenes(false) }}
+                                        >
+                                            <ToggleButton value={true}>Yes</ToggleButton>
+                                            <ToggleButton value={false}>No</ToggleButton>
+                                        </ToggleButtonGroup>
+                                        <div>Prioritize secreted genes</div>
                                     </div>
                                 </div>
                             </div>
                         </CardContent>
                         <CardActions style={{ justifyContent: 'center' }}>
-                            <Button style={{ marginTop: '25px' }} variant="contained" color="secondary" size='large' onClick={submitFile}>Submit</Button>
                         </CardActions>
                         <>
                             {alert}
