@@ -23,12 +23,12 @@ export default function DbTabsViewer(props) {
     var result = props.result
     const geneStats = JSON.parse(props.geneStats)
     var gene = props.gene
-
+    var transcript_level = props.transcript_level
 
     var gene_data = {
         type: 'box',
         x: geneStats[gene],
-        y: 'Expression in submitted file',
+        name: 'input vector',
         boxmean: 'sd',
     }
 
@@ -91,6 +91,20 @@ export default function DbTabsViewer(props) {
     if ('CCLE_proteomics' in result.sorted_data) {
         ccle_proteomics = result.sorted_data.CCLE_proteomics;
         ccle_proteomics_length = Object.keys(ccle_proteomics.y).length;
+    }
+
+    var archs4_data;
+    var gtex_data;
+    var ts_data;
+
+    if (transcript_level) {
+        archs4_data = [archs4];
+        gtex_data = [gtex_transcriptomics];
+        ts_data = [tabula_sapiens];
+    } else {
+        archs4_data = [archs4, gene_data];
+        gtex_data = [gtex_transcriptomics, gene_data];
+        ts_data = [tabula_sapiens, gene_data];
     }
 
     let ARCHS4_link = <a href="https://maayanlab.cloud/archs4" target="_blank" rel="noopener noreferrer">ARCHS4</a>;
@@ -210,7 +224,7 @@ export default function DbTabsViewer(props) {
                             <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4}/>
                             <div style={{ height: '13000px' }}>
                                 <Plot
-                                    data={[archs4, gene_data]}
+                                    data={archs4_data}
                                     layout={{
                                         title: archs4_title,
                                         yaxis: {
@@ -242,7 +256,7 @@ export default function DbTabsViewer(props) {
                             <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcriptomics}/>
                             <div style={{ height: '1500px' }}>
                                 <Plot
-                                    data={[gtex_transcriptomics, gene_data]}
+                                    data={gtex_data}
                                     layout={{
                                         title: gtex_transcriptomics_title, yaxis: { automargin: true },
                                         xaxis: {
@@ -272,7 +286,7 @@ export default function DbTabsViewer(props) {
                             <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={Tabula_Sapiens_link} database_desc={Tabula_Sapiens_desc_d} data={tabula_sapiens}/>
                             <div style={{ height: '13000px' }}>
                                 <Plot
-                                    data={[tabula_sapiens, gene_data]}
+                                    data={ts_data}
                                     layout={{
                                         title: tabula_sapiens_title,
                                         yaxis: {

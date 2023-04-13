@@ -18,22 +18,47 @@ export default async function handler(req, res) {
         const input_data = input['inputData']
 
         const bg = input['bg']
+
+        const transcript = input['transcript']
+
+        var result = [];
+
+        if (transcript) {
+
+            result = await prisma.$queryRaw
+            `
+                select *
+                from screen_targets_transcript_vectorized(
+                ${input_data}::jsonb,
+                (
+                    select database.id
+                    from database
+                    where database.dbname = ${bg}
+                    limit 1
+                )
+                )
+                where p < 0.05
+                order by t desc;
+            `
+
+        } else {
         
-        let result = await prisma.$queryRaw
-        `
-            select gene, t, p, adj_p, log2fc
-            from screen_targets_vectorized(
-            ${input_data}::jsonb,
-            (
-                select database.id
-                from database
-                where database.dbname = ${bg}
-                limit 1
-            )
-            )
-            where p < 0.05
-            order by t desc;
-        `
+            result = await prisma.$queryRaw
+            `
+                select gene, t, p, adj_p, log2fc
+                from screen_targets_vectorized(
+                ${input_data}::jsonb,
+                (
+                    select database.id
+                    from database
+                    where database.dbname = ${bg}
+                    limit 1
+                )
+                )
+                where p < 0.05
+                order by t desc;
+            `
+        }
 
         res.status(200).json(result);
     }

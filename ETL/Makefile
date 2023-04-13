@@ -82,8 +82,18 @@ input/gtex_proteomics.tsv:
 	mkdir -p input
 	curl -L -o $@ https://appyters.maayanlab.cloud/storage/Tumor_Gene_Target_Screener/gtex_proteomics.tsv
 
+## GTEx transcript stats
+input/gtex-transcript-stats.tsv:
+	mkdir -p input
+	curl -L -o $@ https://appyters.maayanlab.cloud/storage/Tumor_Gene_Target_Screener/gtex-transcript-stats.tsv
+
+## ARCHS4 transcript stats
+input/archs4-transcript-stats-clean.tsv.gz:
+	mkdir -p input
+	curl -L -o $@ https://appyters.maayanlab.cloud/storage/Tumor_Gene_Target_Screener/archs4-transcript-stats-clean.tsv.gz
+
 .PHONY: fetch
-fetch: input/Homo_sapiens.gene_info.gz input/Homo_sapiens.gene_summary.tsv input/protein_quant_current_normalized.csv.gz input/CCLE_RNAseq_reads.csv input/CCLE_sample_info.csv input/gtex-gene-stats.tsv input/archs4-gene-stats-clean.tsv input/ts_10x_cell-ontology-class_donors_tissue-labels_v1.tsv input/hpm.tsv input/hpa.tsv input/gtex_proteomics.tsv
+fetch: input/Homo_sapiens.gene_info.gz input/Homo_sapiens.gene_summary.tsv input/protein_quant_current_normalized.csv.gz input/CCLE_RNAseq_reads.csv input/CCLE_sample_info.csv input/gtex-gene-stats.tsv input/archs4-gene-stats-clean.tsv input/ts_10x_cell-ontology-class_donors_tissue-labels_v1.tsv input/hpm.tsv input/hpa.tsv input/gtex_proteomics.tsv input/gtex-transcript-stats.tsv input/archs4-transcript-stats-clean.tsv.gz
 
 
 # PREPROCESS
@@ -110,6 +120,10 @@ preprocessed/CCLE_transcriptomics.tsv: input/CCLE_RNAseq_reads.csv input/CCLE_sa
 preprocessed/CCLE_proteomics.tsv: input/protein_quant_current_normalized.csv.gz
 	mkdir -p preprocessed/
 	$(PYTHON) 00_preprocess_CCLE_proteomics.py
+
+preprocessed/ARCHS4_transcript.tsv: input/archs4-transcript-stats-clean.tsv.gz
+	mkdir -p preprocessed/
+	gunzip -f
 
 .PHONY: preprocess
 preprocess: preprocessed/Homo_sapiens.gene_info.complete.tsv preprocessed/hpa.tsv preprocessed/hpm.tsv preprocessed/gtex_proteomics.tsv preprocessed/CCLE_transcriptomics.tsv preprocessed/CCLE_proteomics.tsv
@@ -161,6 +175,16 @@ ingest/CCLE_Proteomics: preprocessed/CCLE_proteomics.tsv
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n CCLE_proteomics -i $< -o $@
 
+ingest/GTEx_transcript: input/gtex-transcript-stats.tsv
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 12_ingest_standard_form_transcript.py -n GTEx_transcript -i $< -o $@
+
+ingest/ARCHS4_transcript: input/archs4-transcript-stats-clean.tsv.gz
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@
+
 ingest/ARCHS4.sql: input/archs4-gene-stats-clean.tsv
 	make PYTHON=$(PYTHON) ensure-db
 	mkdir -p ingest
@@ -201,8 +225,18 @@ ingest/CCLE_Proteomics.sql: preprocessed/CCLE_proteomics.tsv
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n CCLE_proteomics -i $< -o $@ -m
 
+ingest/GTEx_transcript.sql: input/gtex-transcript-stats.tsv
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 12_ingest_standard_form_transcript.py -n GTEx_transcript -i $< -o $@ -m
+
+ingest/ARCHS4_transcript.sql: input/archs4-transcript-stats-clean.tsv.gz
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@ -m
+
 .PHONY: ingest
-ingest: ingest/gene_info ingest/ARCHS4 ingest/GTEx_transcriptomics ingest/Tabula_Sapiens ingest/HPM ingest/HPA ingest/GTEx_proteomics ingest/CCLE_Transcriptomics ingest/CCLE_Proteomics
+ingest: ingest/gene_info ingest/ARCHS4 ingest/GTEx_transcriptomics ingest/Tabula_Sapiens ingest/HPM ingest/HPA ingest/GTEx_proteomics ingest/CCLE_Transcriptomics ingest/CCLE_Proteomics ingest/GTEx_transcript ingest/ARCHS4_transcript
 
 # MISC
 

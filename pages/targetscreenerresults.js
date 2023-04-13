@@ -8,6 +8,7 @@ import Head from '../components/head';
 import { Autocomplete, TextField, Button } from '@mui/material';
 import TargetResultTable from '../components/targetResultsTable';
 import DbTabsViewer from '../components/dbTabsViewer';
+import DbTabsViewerTranscript from '../components/dbTabsViewerTranscript';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useRouter } from 'next/router';
@@ -20,7 +21,7 @@ const filtMembranes = {items: [{ columnField: "membrane", operatorValue: "=", va
 const filtSecreted = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }]};
 const filtEmpty = { items: [{ columnField: "t", operatorValue: ">", value: "0" }] }
 
-
+const fetcher = (endpoint) => fetch(endpoint).then((res) => res.json())
 
 export default function Results() {
   // Recieve results and relevant gene stats from user submission
@@ -33,18 +34,20 @@ export default function Results() {
   var initMembraneVal;
   var initSecretedVal;
   var results;
+  var transcript_level;
 
   try {
     initMembraneVal = JSON.parse(router.query['membraneGenes']);
     initSecretedVal = JSON.parse(router.query['secretedGenes']);
+    transcript_level = JSON.parse(router.query['transcript_level']);
     results = JSON.parse(string_res);
   } catch {
     initMembraneVal = false;
     initSecretedVal = false;
     results = null;
+    transcript_level = false;
   }
   const [membraneGenes, setMembraneGenes] = React.useState(initMembraneVal);
-
   // Set state of membrane gene filter based on submission page
   const [secretedGenes, setSecretedGenes] = React.useState(initSecretedVal);
 
@@ -62,36 +65,55 @@ export default function Results() {
 
   // Get results list of differentially expressed genes and create array for autocomplete
 
-  var geneList;
+  var targetList;
+  var targetMap = {};
   if (!results) {
-    geneList = ['']
+    targetList = ['']
   } else {
-    geneList = results.map(x => x.gene)
-  }
-  const [gene, setGene] = useState(geneList[0])
+    targetList = results.map(x => x.gene)
+    if (transcript_level) {
+      targetList = results.map(x => x.transcript)
+      results.map(x => targetMap[x.transcript] = x.gene)
+    }
+  } 
+
+  const [gene, setGene] = useState(results[0].gene)
+  const [transcript, setTranscript] = useState(results[0].transcript)
+  const [transcriptExpression, setTranscriptExpression] = useState(transcript_level)
 
 
   const fetchData = useCallback(async () => {
-    let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 'gene': gene })
+    if (transcriptExpression) {
+      let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_transcript_info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'gene': gene, 'transcript': transcript})
+      })
+      const json = await res.json()
+      setTabsData(json)
+
+    } else {
+      let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/get_gene_info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'gene': gene })
     })
-    const json = await res.json()
-    setTabsData(json)
-  }, [runtimeConfig, gene, setTabsData]);
+      const json = await res.json()
+      setTabsData(json)
+    }
+  }, [runtimeConfig, transcriptExpression, gene, setTabsData]);
 
   useEffect(() => {
-    // fetch data for given gene
-    
-
     // call the function
     fetchData()
       // make sure to catch any error
       .catch(console.error);
   }, [gene, runtimeConfig, fetchData])
+
 
 
   useEffect(() => {
@@ -109,7 +131,6 @@ export default function Results() {
   // Try to display results --> on reload direct them back to the Target Screener page
   if (results) {
     // Use membraneGene state to determine filter
-    
 
     return (
 
@@ -147,25 +168,62 @@ export default function Results() {
               <ToggleButton value={false}>NO</ToggleButton>
             </ToggleButtonGroup>
           </div>
-          <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} fname={fname}/>
+          <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} settranscript={setTranscript} transcript_level={transcript_level} fname={fname}/>
           <div className={styles.textDiv}>
-            <p>View a box plot for each identified target gene in the table by clicking on the table row, or by selecting the gene from the dropdown box below:</p>
+            <p>View a box plot for each identified target in the table by clicking on the table row, or by selecting the gene from the dropdown box below:</p>
           </div>
-          <div style={{ marginBottom: '15px' }}>
+          <div className={styles.horizontalFlexbox}>
+          <div style={{ marginBottom: '0px' }}>
             <Autocomplete
               disablePortal
               disableClearable
               freeSolo={false}
               value={''}
-              options={geneList}
+              options={targetList}
               sx={{ width: 400 }}
               color="secondary"
-              onChange={(event, value) => { setGene(value) }}
-              renderInput={(params) => <TextField {...params} color="secondary" label="Gene Symbol" />}
+              onChange={(event, value) => { 
+                if (transcript_level) {
+                  setTranscript(value)
+                  setGene(targetMap[value])
+                } else {
+                  setGene(value)
+                }
+              }}
+              renderInput={(params) => <TextField {...params} color="secondary" label="Target" />}
             />
+          </div>
+          {transcript_level ?
+          <div style={{ marginBottom: '10px', marginLeft: '30px' }}>
+            <div  style={{ marginBottom: '10px' }}>View Expression of Target:</div>
+          <ToggleButtonGroup
+              color="secondary"
+              value={transcriptExpression}
+              exclusive
+              onChange={(event, newValue) => { 
+                if (newValue != null) {
+                  setTranscriptExpression(newValue)
+                  if (database > 2) {
+                    setDatabase(0)
+                  }
+                }
+              }
+              }
+          >
+            <ToggleButton value={true}>Transcript</ToggleButton>
+            <ToggleButton value={false}>Gene</ToggleButton>
+          </ToggleButtonGroup>
+          </div>
+          :
+          <></>}
 
           </div>
-          <DbTabsViewer gene={gene} database={database} setdatabase={setDatabase} result={tabsData} geneStats={string_stats} />
+          
+          {transcriptExpression ? 
+          <DbTabsViewerTranscript transcript={transcript} gene={gene} database={database} setdatabase={setDatabase} result={tabsData} transcriptStats={string_stats} transcript_level={transcript_level}/>
+          :
+          <DbTabsViewer gene={gene} database={database} setdatabase={setDatabase} result={tabsData} geneStats={string_stats} transcript_level={transcript_level}/>
+          }
           <Footer />
         </div>
       </div>
