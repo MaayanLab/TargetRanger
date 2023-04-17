@@ -8,6 +8,7 @@ import Head from '../components/head';
 import { Card, Autocomplete, TextField, Backdrop, CircularProgress, Box, FormControl, Select, MenuItem, ToggleButtonGroup, ToggleButton, Button } from '@mui/material';
 import datasets from '../public/files/tcga_datasets.json';
 import coords from '../public/files/tcga_coordinates.json';
+import codes from '../public/files/cancer_type.json';
 import TCGATable from '../components/tcgaTable';
 import dynamic from 'next/dynamic';
 import { useState, useCallback } from 'react';
@@ -167,6 +168,10 @@ export default function Page() {
             <div className={styles.mainDiv}>
 
                 <Header />
+                <div style={{width: '80%', textAlign: 'center'}}>
+                <h2>Systematic target prioritization for TCGA subtypes with TargetRanger</h2>
+                <p>Each cancer type from TCGA was analyzed to identify subtypes from the RNA-seq samples with unsupervised clustering. Samples from each clusters can be submitted to TargetRanger for analysis. Information about each cluster is provided near each interactive UMAP plot.</p>
+                </div>
                 <Dialog open={open} onClose={handleClose}>
                     <DialogTitle sx={{textAlign: 'center'}}>Submit to TargetRanger</DialogTitle>
                     <DialogContent>
@@ -214,7 +219,7 @@ export default function Page() {
 
                     </DialogActions>
                 </Dialog>
-                <p>Explore clustered expression groupings from the pan-cancer RNA-seq data collected by the <a href='https://www.cancer.gov/ccg/research/genome-sequencing/tcga' target='_blank' rel="noreferrer">TCGA</a>. Seach for a specific cancer type below:</p>
+                
                 <Autocomplete
                     disablePortal
                     disableClearable
@@ -231,8 +236,8 @@ export default function Page() {
                     renderInput={(params) => <TextField {...params} color="secondary" label="Type" />}
                 />
                 {categories.map((el) => {
-
-                    return (<> <div><h2>{el}</h2></div>
+                    const TCGA_link = "https://portal.gdc.cancer.gov/projects/TCGA-" + el;
+                    return (<> <div><h2>{codes[el]} (<a href={TCGA_link} target='_blank' rel="noopener noreferrer">{el}</a>)</h2></div>
                         <div style={{ width: '100%', alignItems: 'center', justifyContent: 'center', textAlign: 'center', alignItems: 'center', display: 'flex' }} id={el}>
 
                             <Card className={styles.card} key={el}>
@@ -241,10 +246,18 @@ export default function Page() {
                                 <Plot
                                     data={coords[el]}
                                     layout={{
-                                        title: '', yaxis: { automargin: true },
+                                        title: '', 
+                                        yaxis: { automargin: true, 
+                                            title: {
+                                            text: 'UMAP-1'
+                                        }},
+                                        xaxis: {
+                                            title: {
+                                            text: 'UMAP-2'
+                                        }},
                                         showlegend: true,
                                     }}
-                                    style={{ width: '50%', height: '100%' }}
+                                    style={{ width: '55%', height: '100%' }}
                                     config={{ responsive: true }}
                                 />
                             </Card>

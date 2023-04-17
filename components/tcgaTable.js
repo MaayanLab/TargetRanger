@@ -29,8 +29,8 @@ export default function TCGATable(props) {
     var table = props.table;
 
     let columns = [
-        { field: "filename", headerName: "File", minWidth: 200},
-        { field: "n", headerName: "# Samples", type: "number", minWidth: 10 },
+        { field: "cluster", headerName: "Cluster", minWidth: 60, flex: 1},
+        { field: "n", headerName: "# Samples", type: "number", minWidth: 80, flex: 1 },
         { field: "mutations", headerName: "Common Mutations", type: "number", minWidth: 150, renderCell: (cellValues) => {
             const mutationString = Object.keys(cellValues.row.mutations).map(el => el + ': ' +cellValues.row.mutations[el].toString()).join(', ')
             const preview = `${mutationString.split(',')[0].split(' ')[0]}  (${mutationString.split(',')[0].split(' ')[2]})`
@@ -44,16 +44,11 @@ export default function TCGATable(props) {
         },
         {
             field: "action",
-            headerName: "Links",
+            headerName: "",
             sortable: false,
-            flex: 1,
-            minWidth: 265,
+            minWidth: 300,
             renderCell: (params) => {
-            const onClickCancer = (e) => {
-                e.stopPropagation(); // don't select this row after clicking
-                
-                window.open(`https://portal.gdc.cancer.gov/projects/TCGA-${params.row.filename.split('_')[0]}`, '_blank', 'noreferrer');
-            };
+
             const onClickSubmit = (e) => {
                 e.stopPropagation(); // don't select this row after clicking
                 handleClickOpen();
@@ -66,11 +61,12 @@ export default function TCGATable(props) {
         
             return (
                 <div className={styles.horizontalFlexbox} style={{gap: '0px', padding: '0px'}}>
-                    <Tooltip title="Explore Genomic Data Commons">
-                        <Button onClick={onClickCancer}><img sx={{m: 1}} style={{width: '70px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/gdclogo.png"} alt="GDC"/></Button>
+                    <Tooltip title="Download">
+                        <Button onClick={onClickDownload}><DownloadIcon color="secondary"></DownloadIcon></Button>
                     </Tooltip>
-                    <Button onClick={onClickDownload}><DownloadIcon color="secondary"></DownloadIcon></Button>
-                    <Button onClick={onClickSubmit} variant="outlined" color='secondary'>Submit</Button>
+                    <Tooltip title="Analyze in TargetRanger">
+                        <Button onClick={onClickSubmit}><img sx={{m: 1}} style={{width: '25px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/logo.png"} alt="GDC"/></Button>
+                    </Tooltip>
                 </div>
             )
             }
@@ -81,10 +77,11 @@ export default function TCGATable(props) {
 
     for (let i =0; i < table.length; i++) {
         table[i]['id'] = table[i]['filename'];
+        table[i]['cluster'] = table[i]['filename'].split('_')[1].replace('cluster', 'C').replace('.tsv', '');
     }
 
     return (
-        <div style={{ height: "400px", width: "60%", margin: '3%' }}>
+        <div style={{ height: "400px", margin: '3%', minWidth: '500px' }}>
             <DataGrid
                 rows={table}
                 columns={columns}
