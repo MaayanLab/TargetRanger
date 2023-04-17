@@ -8,10 +8,23 @@ import DownloadIcon from '@mui/icons-material/Download';
 import PreviewIcon from '@mui/icons-material/Preview';
 
 
+    
+    
+
+    
+   
+
+
 
 
 export default function TCGATable(props) {
     const runtimeConfig = useRuntimeConfig()
+    const filename = props.fileName;
+    const setFilename = props.setFileName;
+    const handleClickOpen = props.handleClickOpen;
+
+    
+    
 
     var table = props.table;
 
@@ -43,8 +56,8 @@ export default function TCGATable(props) {
             };
             const onClickSubmit = (e) => {
                 e.stopPropagation(); // don't select this row after clicking
-                
-                window.open(`https://maayanlab.cloud/archs4/gene/${params.row.gene}`, '_blank', 'noreferrer');
+                handleClickOpen();
+                setFilename(params.row.filename);
             };
             const onClickDownload = (e) => {
                 e.stopPropagation(); // don't select this row after clicking
@@ -58,7 +71,6 @@ export default function TCGATable(props) {
                     </Tooltip>
                     <Button onClick={onClickDownload}><img sx={{m: 1}} /><DownloadIcon color="secondary"></DownloadIcon></Button>
                     <Button onClick={onClickSubmit} variant="outlined" color='secondary'>Submit</Button>
-                    
                 </div>
             )
             }
