@@ -69,7 +69,7 @@ export default function TCGATable(props) {
                     <Tooltip title="Explore Genomic Data Commons">
                         <Button onClick={onClickCancer}><img sx={{m: 1}} style={{width: '70px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/gdclogo.png"} alt="GDC"/></Button>
                     </Tooltip>
-                    <Button onClick={onClickDownload}><img sx={{m: 1}} /><DownloadIcon color="secondary"></DownloadIcon></Button>
+                    <Button onClick={onClickDownload}><DownloadIcon color="secondary"></DownloadIcon></Button>
                     <Button onClick={onClickSubmit} variant="outlined" color='secondary'>Submit</Button>
                 </div>
             )
