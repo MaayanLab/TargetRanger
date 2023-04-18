@@ -166,7 +166,7 @@ export default function Page() {
                     gene = gene.split('.')[0]
                 }
                 if (level) {
-                    var convertedSymbol = conversionDict[gene];
+                    var convertedSymbol = conversionDict[gene] || gene;
                     geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
                     geneCounts[convertedSymbol] = data.map(x => parseInt(x));
                 } else {
