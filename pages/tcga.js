@@ -6,9 +6,11 @@ import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
 import { Card, Autocomplete, TextField, Backdrop, CircularProgress, Box, FormControl, Select, MenuItem, ToggleButtonGroup, ToggleButton, Button } from '@mui/material';
+import {Tooltip, IconButton} from '@mui/material';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import datasets from '../public/files/tcga_datasets.json';
 import coords from '../public/files/tcga_coordinates.json';
-import codes from '../public/files/cancer_type.json';
+import cancer_map from '../public/files/cancer_type.json';
 import TCGATable from '../components/tcgaTable';
 import dynamic from 'next/dynamic';
 import { useState, useCallback } from 'react';
@@ -167,6 +169,12 @@ export default function Page() {
 
             <div className={styles.mainDiv}>
 
+                <div className={styles.upArrowButton}>
+                    <Tooltip title="Return to Top" placement="left">
+                        <IconButton onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }) }} color="secondary"> <ArrowUpwardIcon style={{ transform: 'scale(2)' }} /></IconButton>
+                    </Tooltip>
+                </div>
+
                 <Header />
                 <div style={{width: '80%', textAlign: 'center'}}>
                 <h2>Systematic target prioritization for TCGA subtypes with TargetRanger</h2>
@@ -213,8 +221,8 @@ export default function Page() {
                             <div>Prioritize secreted genes</div>
                         </div>
                     </DialogContent>
-                    <DialogActions>
-                        <Button variant="contained" color="secondary" onClick={onClickSubmit}>Submit
+                    <DialogActions sx={{justifyContent: 'center'}}>
+                        <Button variant="contained" color="secondary" onClick={onClickSubmit}>Rank Targets with TargetRanger
                         </Button>
 
                     </DialogActions>
@@ -236,13 +244,11 @@ export default function Page() {
                     renderInput={(params) => <TextField {...params} color="secondary" label="Type" />}
                 />
                 {categories.map((el) => {
-                    const TCGA_link = "https://portal.gdc.cancer.gov/projects/TCGA-" + el;
-                    return (<> <div><h2>{codes[el]} (<a href={TCGA_link} target='_blank' rel="noopener noreferrer">{el}</a>)</h2></div>
+                    const TCGA_link = 'https://portal.gdc.cancer.gov/projects/TCGA-' + el;
+                    return (<> <div><h2>{cancer_map[el]} (<a href={TCGA_link} target="_blank" rel="noopener noreferrer">{el}</a>)</h2></div>
                         <div style={{ width: '100%', alignItems: 'center', justifyContent: 'center', textAlign: 'center', alignItems: 'center', display: 'flex' }} id={el}>
 
                             <Card className={styles.card} key={el}>
-
-                                <TCGATable table={datasets[el]} fileName={fileName} setFileName={setFileName} handleClickOpen={handleClickOpen}/>
                                 <Plot
                                     data={coords[el]}
                                     layout={{
@@ -260,6 +266,8 @@ export default function Page() {
                                     style={{ width: '55%', height: '100%' }}
                                     config={{ responsive: true }}
                                 />
+                                <TCGATable table={datasets[el]} fileName={fileName} setFileName={setFileName} handleClickOpen={handleClickOpen}/>
+                                
                             </Card>
                         </div>
                     </>)

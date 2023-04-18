@@ -74,7 +74,7 @@ export default async function handler(req, res) {
                         mean: mean,
                         lowerfence: lowerfence,
                         upperfence: upperfence,
-                        y: names,
+                        names: names,
                         orientation: 'h',
                         type: 'box'
                     }
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
                         sd: std,
                         lowerfence: lowerfence,
                         upperfence: upperfence,
-                        y: names,
+                        names: names,
                         orientation: 'h',
                         type: 'box'
                     }
@@ -108,14 +108,14 @@ export default async function handler(req, res) {
                 const levels = descriptions.map(description => df.value[description]);
 
                 if (db == 'HPA') {
-                    descriptions = descriptions.map(description => description.replace('\n', '<br>'));
+                    descriptions = descriptions.map(description => description.replace('\n', ' '));
                 }
 
                 const names = descriptions;
 
                 let data = {
-                    x: levels,
-                    y: names,
+                    values: levels,
+                    names: names,
                     type: "scatter",
                     mode: "markers",
                     marker: { color: '#1f77b4' },

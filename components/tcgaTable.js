@@ -31,7 +31,7 @@ export default function TCGATable(props) {
     let columns = [
         { field: "cluster", headerName: "Cluster", minWidth: 60, flex: 1},
         { field: "n", headerName: "# Samples", type: "number", minWidth: 80, flex: 1 },
-        { field: "mutations", headerName: "Common Mutations", type: "number", minWidth: 150, renderCell: (cellValues) => {
+        { field: "mutations", headerName: "Common Mutations", type: "number", minWidth: 160, renderCell: (cellValues) => {
             const mutationString = Object.keys(cellValues.row.mutations).map(el => el + ': ' +cellValues.row.mutations[el].toString()).join(', ')
             const preview = `${mutationString.split(',')[0].split(' ')[0]}  (${mutationString.split(',')[0].split(' ')[2]})`
             console.log(mutationString)
@@ -43,17 +43,12 @@ export default function TCGATable(props) {
         }
         },
         {
-            field: "action",
-            headerName: "",
+            field: "download",
+            headerName: "Download",
             sortable: false,
-            minWidth: 300,
+            minWidth: 50,
             renderCell: (params) => {
 
-            const onClickSubmit = (e) => {
-                e.stopPropagation(); // don't select this row after clicking
-                handleClickOpen();
-                setFilename(params.row.filename);
-            };
             const onClickDownload = (e) => {
                 e.stopPropagation(); // don't select this row after clicking
                 window.open(`${runtimeConfig.NEXT_PUBLIC_DOWNLOADS}TCGA/${params.row.filename}`);
@@ -64,6 +59,25 @@ export default function TCGATable(props) {
                     <Tooltip title="Download">
                         <Button onClick={onClickDownload}><DownloadIcon color="secondary"></DownloadIcon></Button>
                     </Tooltip>
+                </div>
+            )
+            }
+        },
+        {
+            field: "analyze",
+            headerName: "Rank Targets",
+            sortable: false,
+            minWidth: 50,
+            renderCell: (params) => {
+
+            const onClickSubmit = (e) => {
+                e.stopPropagation(); // don't select this row after clicking
+                handleClickOpen();
+                setFilename(params.row.filename);
+            };
+        
+            return (
+                <div className={styles.horizontalFlexbox} style={{gap: '0px', padding: '0px'}}>
                     <Tooltip title="Analyze in TargetRanger">
                         <Button onClick={onClickSubmit}><img sx={{m: 1}} style={{width: '25px', display: 'flex', flexDirection: 'row', gap: '0px', padding: '0px', marginLeft: '0px'}} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/logo.png"} alt="GDC"/></Button>
                     </Tooltip>
@@ -81,7 +95,7 @@ export default function TCGATable(props) {
     }
 
     return (
-        <div style={{ height: "400px", margin: '3%', minWidth: '500px' }}>
+        <div style={{ height: "400px", margin: '3%', minWidth: '520px' }}>
             <DataGrid
                 rows={table}
                 columns={columns}

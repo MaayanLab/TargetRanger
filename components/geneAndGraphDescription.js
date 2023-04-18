@@ -1,4 +1,4 @@
-import { Button, Menu } from '@mui/material';
+import { Button, Menu, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import * as React from 'react';
 import styles from '../styles/GeneDescription.module.css';
 
@@ -23,7 +23,7 @@ function createCSV(gene, data, dbname) {
     return csvData;
 }
 
-function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, database_desc, data }) {
+function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, database_desc, data, horizontal, setHorizontal }) {
 
     // Gene links
     let Ensembl_link = 'https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t=' + transcript;
@@ -79,28 +79,46 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
             </div>
             <br />
             <div><b>{database}:</b> {database_desc}</div>
-            <div className={styles.download}>
-                <Button
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                >
-                    Download plot data
-                </Button>
-                <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'basic-button',
-                    }}
-                >
-                    <Button download={gene + '-' + database.props.children + '.csv'} onClick={formatCSV}>CSV</Button>
-                    <Button href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`} download={gene + '-' + database.props.children + '.json'} onClick={handleClose}>JSON</Button>
-                </Menu>
+            <div style={{ display: 'flex', margin: '1%', textAlign: 'right', justifyContent: 'end' }}>
+                <div >
+                    <ToggleButtonGroup
+                        color="secondary"
+                        value={horizontal}
+                        exclusive
+                        sx={{ marginBottom: '10px' }}
+                        onChange={(event, newValue) => {
+                            if (newValue !== null)
+                                setHorizontal(newValue);
+                        }
+                        }
+                    >
+                        <ToggleButton value={false}>Vertical</ToggleButton>
+                        <ToggleButton value={true}>Horizontal</ToggleButton>
+                    </ToggleButtonGroup>
+                </div>
+                <div className={styles.download}>
+                    <Button
+                        id="basic-button"
+                        aria-controls={open ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        onClick={handleClick}
+                    >
+                        Download plot data
+                    </Button>
+                    <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                        }}
+                    >
+                        <Button download={gene + '-' + database.props.children + '.csv'} onClick={formatCSV}>CSV</Button>
+                        <Button href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`} download={gene + '-' + database.props.children + '.json'} onClick={handleClose}>JSON</Button>
+                    </Menu>
+                </div>
             </div>
         </>
     );
