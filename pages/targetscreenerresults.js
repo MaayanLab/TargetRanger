@@ -19,7 +19,7 @@ import { useCallback } from 'react';
 // Setup possible filters
 const filtMembranes = {items: [{ columnField: "membrane", operatorValue: "=", value: "1" }]};
 const filtSecreted = {items: [{ columnField: "secreted", operatorValue: "=", value: "1" }]};
-const filtEmpty = { items: [{ columnField: "t", operatorValue: ">", value: "0" }] }
+const filtEmpty = { items: [{ columnField: "t", operatorValue: ">=", value: "0" }] }
 
 const fetcher = (endpoint) => fetch(endpoint).then((res) => res.json())
 
