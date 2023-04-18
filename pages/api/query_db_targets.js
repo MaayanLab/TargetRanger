@@ -27,36 +27,44 @@ export default async function handler(req, res) {
 
             result = await prisma.$queryRaw
             `
-                select *
-                from screen_targets_transcript_vectorized(
-                ${input_data}::jsonb,
-                (
-                    select database.id
-                    from database
-                    where database.dbname = ${bg}
-                    limit 1
-                )
-                )
-                where p < 0.05
-                order by t desc;
+                with cte as (
+                    select
+                        row_number() over (order by t desc) as index,
+                        transcript, gene, t, p, adj_p, log2fc
+                    from screen_targets_transcript_vectorized(
+                        ${input_data}::jsonb,
+                        (
+                            select database.id
+                            from database
+                            where database.dbname = ${bg}
+                            limit 1
+                        )
+                    )
+                    order by t desc
+                ) select transcript, gene, t, p, adj_p, log2fc from cte
+                where index < 100 or p < 0.05;
             `
 
         } else {
         
             result = await prisma.$queryRaw
             `
-                select gene, t, p, adj_p, log2fc
-                from screen_targets_vectorized(
-                ${input_data}::jsonb,
-                (
-                    select database.id
-                    from database
-                    where database.dbname = ${bg}
-                    limit 1
-                )
-                )
-                where p < 0.05
-                order by t desc;
+                with cte as (
+                    select
+                        row_number() over (order by t desc) as index,
+                        gene, t, p, adj_p, log2fc
+                    from screen_targets_vectorized(
+                        ${input_data}::jsonb,
+                        (
+                            select database.id
+                            from database
+                            where database.dbname = ${bg}
+                            limit 1
+                        )
+                    )
+                    order by t desc
+                ) select gene, t, p, adj_p, log2fc from cte
+                where index < 100 or p < 0.05;
             `
         }
 
