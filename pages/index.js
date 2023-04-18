@@ -193,7 +193,7 @@ export default function Page() {
 
         var rows = content.split(/\r?\n/)
         if (rows[1].includes(',')) {
-            rows = rows.map(row => row.split(','))
+            rows = rows.map(row => row.split(',').map(col => /^"?(.*?)"?$/.exec(col)[1]))
         } else {
             rows = rows.map(row => row.split('\t'))
         }
