@@ -194,7 +194,7 @@ export default function Page() {
 
         const content = fileReader.current.result;
 
-        var rows = content.split('\n')
+        var rows = content.split(/\r?\n/)
         if (rows[1].includes(',')) {
             rows = rows.map(row => row.split(','))
         } else {
