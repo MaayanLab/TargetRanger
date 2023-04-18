@@ -7,6 +7,7 @@ import Header from '../components/header';
 import Head from '../components/head';
 import { Card, Autocomplete, TextField, Backdrop, CircularProgress, Box, FormControl, Select, MenuItem, ToggleButtonGroup, ToggleButton, Button } from '@mui/material';
 import {Tooltip, IconButton} from '@mui/material';
+import Image from 'next/image';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import datasets from '../public/files/tcga_datasets.json';
 import coords from '../public/files/tcga_coordinates.json';
@@ -267,7 +268,26 @@ export default function Page() {
                                     config={{ responsive: true }}
                                 />
                                 <TCGATable table={datasets[el]} fileName={fileName} setFileName={setFileName} handleClickOpen={handleClickOpen}/>
-                                
+                                <div style={{width: '100%', position: 'relatvie', display: 'flex'}}>
+                                    <p style={{width: '25%', position: 'relatvie', textAlign: 'left', margin: '5%', fontSize: '14px'}}>Top cell-surface targets in each subtype. Rows are tumor Leiden subtypes, hierarchically clustered using Euclidean distance. Columns are the top 30 significant (adjusted p-value &lt; .01) target genes, sorted by frequency across subtypes and filtered for genes identified against ARCHS4, GTEx, and Tabula Sapiens backgrounds in at least one cluster. </p>
+                                    <div style={{  position: 'relative', width: '550px', height: '350px'}}>
+                                        <Image
+                                        src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + `/images/heatmaps/${el}_targets.png`}
+                                        alt="Targets"
+                                        layout='fill'
+                                        objectFit="contain"
+                                        />
+                                    
+                                    </div>
+                                    <div style={{  position: 'relative', width: '100px', height: '200px', marginTop: '3%'}}>
+                                    <Image
+                                        src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + `/images/legend.png`}
+                                        alt="Targets"
+                                        layout='fill'
+                                        objectFit="contain"
+                                        />
+                                    </div>
+                                </div>
                             </Card>
                         </div>
                     </>)

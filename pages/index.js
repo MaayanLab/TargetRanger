@@ -6,10 +6,6 @@ import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
 import SideBar from '../components/sideBar';
-import exampleData from '../public/files/GSE49155.json';
-import exampleCounts from '../public/files/GSE49155-counts.json';
-import exampleDataTranscript from '../public/files/GSE49155-transcript.json';
-import exampleCountsTranscript from '../public/files/GSE49155-counts-transcript.json';
 import conversionDict from '../public/files/conversion_dict.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -79,9 +75,6 @@ const databases = new Map([
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
     var fileReader = useRef(null);
-    const [value, setValue] = React.useState(0);
-
-
 
     // For MUI loading icon
 
@@ -216,8 +209,18 @@ export default function Page() {
             if (useDefaultFile) {
                 setLoading(true);
                 if (level) {
-                    submitGeneStats(exampleData, exampleCounts)
-                } else submitGeneStats(exampleDataTranscript, exampleCountsTranscript)
+                    fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient.tsv').then((r) => r.text())
+                    .then(text => {
+                        const rows = text.split('\n').map(row => row.split('\t'));
+                        calcFileStats(rows);
+                    });
+                } else {
+                    fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient-transcript.tsv').then((r) => r.text())
+                    .then(text => {
+                        const rows = text.split('\n').map(row => row.split('\t'));
+                        calcFileStats(rows);
+                    });
+                }
             } else {
                 setLoading(true);
                 handleFileChosen(file)
@@ -340,7 +343,7 @@ export default function Page() {
                                                 </div>
                                                 <div className={styles.horizontalFlexboxNoGap}>
 
-                                                    <a style={{ textDecoration: 'none', gap: '0px' }} href={level ? "files/GSE49155-patient.tsv" : "files/GSE49155-patient-transcript.tsv"} download={level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv"}>
+                                                    <a style={{ textDecoration: 'none', gap: '0px' }} href={level ? runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient.tsv' : runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient-transcript.tsv'} download={level ? "GSE49155-patient.tsv" : "GSE49155-patient-transcript.tsv"}>
                                                         <Button className={styles.darkOnHover} variant="text" color="secondary" endIcon={<DownloadIcon />}>
                                                             Example
                                                         </Button>
