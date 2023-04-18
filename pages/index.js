@@ -166,7 +166,7 @@ export default function Page() {
                     gene = gene.split('.')[0]
                 }
                 if (level) {
-                    var convertedSymbol = conversionDict[gene];
+                    var convertedSymbol = conversionDict[gene] || gene;
                     geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
                     geneCounts[convertedSymbol] = data.map(x => parseInt(x));
                 } else {
@@ -189,7 +189,7 @@ export default function Page() {
 
         var rows = content.split(/\r?\n/)
         if (rows[1].includes(',')) {
-            rows = rows.map(row => row.split(','))
+            rows = rows.map(row => row.split(',').map(col => /^"?(.*?)"?$/.exec(col)[1]))
         } else {
             rows = rows.map(row => row.split('\t'))
         }
