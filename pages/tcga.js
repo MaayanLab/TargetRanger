@@ -135,7 +135,7 @@ export default function Page() {
                 if (gene.includes('.')) {
                     gene = gene.split('.')[0]
                 }
-                var convertedSymbol = conversionDict[gene];
+                var convertedSymbol = conversionDict[gene] || gene;
                 geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
                 geneCounts[convertedSymbol] = data.map(x => parseInt(x));
             }
