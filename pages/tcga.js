@@ -13,7 +13,7 @@ import coords from '../public/files/tcga_coordinates.json';
 import cancer_map from '../public/files/cancer_type.json';
 import TCGATable from '../components/tcgaTable';
 import dynamic from 'next/dynamic';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import conversionDict from '../public/files/conversion_dict.json'
 import { useRouter } from "next/router";
 import { useRuntimeConfig } from '../components/runtimeConfig';
