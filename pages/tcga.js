@@ -269,7 +269,7 @@ export default function Page() {
                                 />
                                 <TCGATable table={datasets[el]} fileName={fileName} setFileName={setFileName} handleClickOpen={handleClickOpen}/>
                                 <div style={{width: '100%', position: 'relatvie', display: 'flex'}}>
-                                    <p style={{width: '25%', position: 'relatvie', textAlign: 'left', margin: '5%', fontSize: '14px'}}>Top cell-surface targets in each subtype. Rows are tumor Leiden subtypes, hierarchically clustered using Euclidean distance. Columns are the top 30 significant (adjusted p-value &lt; .01) target genes, sorted by frequency across subtypes and filtered for genes identified against ARCHS4, GTEx, and Tabula Sapiens backgrounds in at least one cluster. </p>
+                                    <p style={{width: '25%', position: 'relatvie', textAlign: 'left', margin: '5%', fontSize: '14px'}}>Top cell-surface targets for each subtype. Rows are tumor subtypes determined by the Leiden algorithm. Columns are the top significant (adjusted p-value &lt; .01) targets identified by TargetRanger, sorted by frequency across subtypes and filtered for targets identified using the ARCHS4, GTEx, and Tabula Sapiens atlases as backgrounds. </p>
                                     <div style={{  position: 'relative', width: '550px', height: '350px'}}>
                                         <Image
                                         src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + `/images/heatmaps/${el}_targets.png`}

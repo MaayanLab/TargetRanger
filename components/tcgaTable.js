@@ -110,6 +110,9 @@ export default function TCGATable(props) {
                     color: 'secondary.main',
                   },
                 }}
+                hideFooterPagination
+                hideFooterSelectedRowCount
+                hideFooter
             />
     </div>
     )
