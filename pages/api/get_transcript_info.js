@@ -70,7 +70,7 @@ export default async function handler(req, res) {
                         mean: mean,
                         lowerfence: lowerfence,
                         upperfence: upperfence,
-                        y: names,
+                        names: names,
                         orientation: 'h',
                         type: 'box'
                     }
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
                         sd: std,
                         lowerfence: lowerfence,
                         upperfence: upperfence,
-                        y: names,
+                        names: names,
                         orientation: 'h',
                         type: 'box'
                     }

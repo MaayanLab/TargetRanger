@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { Container} from '@mui/material';
 import dynamic from 'next/dynamic';
 import { useRuntimeConfig } from "./runtimeConfig";
+import PlotOrientation from "./plotOrientation";
+import { useState } from "react";
 
 
 const Plot = dynamic(() => import('react-plotly.js'), {
@@ -25,9 +27,11 @@ export default function DbTabsViewer(props) {
     var gene = props.gene
     var transcript_level = props.transcript_level
 
+    const [horizontal, setHorizontal] = useState(true)
+
     var gene_data = {
         type: 'box',
-        x: geneStats[gene],
+        values: geneStats[gene],
         name: 'input vector',
         boxmean: 'sd',
     }
@@ -62,50 +66,51 @@ export default function DbTabsViewer(props) {
 
 
     let gtex_transcriptomics = null, archs4 = null, tabula_sapiens = null, hpm = null, hpa = null, gtex_proteomics = null, ccle_transcriptomics = null, ccle_proteomics = null;
-    let hpa_length = 0, gtex_proteomics_length = 0, ccle_transcriptomics_length = 0, ccle_proteomics_length = 0;
+    let gtex_transcriptomics_names_x = [], gtex_transcriptomics_names_y = [], archs4_names_x = [], archs4_names_y = [], ts_names_y = [], ts_names_x = [];
+    let hpm_names_x = [], hpm_names_y = [], hpa_names_x = [], hpa_names_y = [], gtex_proteomics_names_x = [], gtex_proteomics_names_y = [], ccle_transcriptomics_names_x = [], ccle_transcriptomics_names_y = [], ccle_prot_names_x = [], ccle_prot_names_y = [];
 
     if ('GTEx_transcriptomics' in result.sorted_data) {
         gtex_transcriptomics = result.sorted_data.GTEx_transcriptomics;
+        gtex_transcriptomics_names_x = {"x": gtex_transcriptomics.names.slice().reverse(), orientation: 'v'}
+        gtex_transcriptomics_names_y = {"y": gtex_transcriptomics.names, orientation: 'h'}
     }
     if ('ARCHS4' in result.sorted_data) {
-        archs4 = result.sorted_data.ARCHS4;
+        archs4 = result.sorted_data.ARCHS4;  
+        archs4_names_x = {"x": archs4.names.slice().reverse(), orientation: 'v'}
+        archs4_names_y = {"y": archs4.names, orientation: 'h'}
     } 
     if ('Tabula_Sapiens' in result.sorted_data) {
         tabula_sapiens = result.sorted_data.Tabula_Sapiens;
+        ts_names_x = {"x": tabula_sapiens.names.slice().reverse(), orientation: 'v'}
+        ts_names_y = {"y": tabula_sapiens.names, orientation: 'h'}
     } 
     if ('HPM' in result.sorted_data) {
         hpm = result.sorted_data.HPM;
+        hpm_names_x = {"x": hpm.names.slice().reverse(), "y": hpm.values.slice().reverse(), orientation: 'v'}
+        hpm_names_y = {"y": hpm.names, "x": hpm.values, orientation: 'h'}
     } 
     if ('HPA' in result.sorted_data) {
         hpa = result.sorted_data.HPA;
-        hpa_length = Object.keys(hpa.y).length;
+        hpa_names_x = {"x": hpa.names.slice().reverse(), "y": hpa.values.slice().reverse(), orientation: 'v'}
+        hpa_names_y = {"y": hpa.names, "x": hpa.values, orientation: 'h'}
     } 
     if ('GTEx_proteomics' in result.sorted_data) {
         gtex_proteomics = result.sorted_data.GTEx_proteomics;
-        gtex_proteomics_length = Object.keys(gtex_proteomics.y).length;
+        gtex_proteomics_names_x = {"x": gtex_proteomics.names.slice().reverse(), orientation: 'v'}
+        gtex_proteomics_names_y = {"y": gtex_proteomics.names, orientation: 'h'}
     }
     if ('CCLE_transcriptomics' in result.sorted_data) {
         ccle_transcriptomics = result.sorted_data.CCLE_transcriptomics;
-        ccle_transcriptomics_length = Object.keys(ccle_transcriptomics.y).length;
+        ccle_transcriptomics_names_x = {"x": ccle_transcriptomics.names.slice().reverse(), "y": ccle_transcriptomics.values.slice().reverse(), orientation: 'v'}
+        ccle_transcriptomics_names_y = {"y": ccle_transcriptomics.names, "x": ccle_transcriptomics.values, orientation: 'h'}
     }
     if ('CCLE_proteomics' in result.sorted_data) {
-        ccle_proteomics = result.sorted_data.CCLE_proteomics;
-        ccle_proteomics_length = Object.keys(ccle_proteomics.y).length;
+        ccle_proteomics =  result.sorted_data.CCLE_proteomics;
+        ccle_prot_names_x = {"x": ccle_proteomics.names.slice().reverse(), "y": ccle_proteomics.values.slice().reverse(), orientation: 'v'}
+        ccle_prot_names_y = {"y": ccle_proteomics.names, "x": ccle_proteomics.values, orientation: 'h'}
     }
 
-    var archs4_data;
-    var gtex_data;
-    var ts_data;
 
-    if (transcript_level) {
-        archs4_data = [archs4];
-        gtex_data = [gtex_transcriptomics];
-        ts_data = [tabula_sapiens];
-    } else {
-        archs4_data = [archs4, gene_data];
-        gtex_data = [gtex_transcriptomics, gene_data];
-        ts_data = [tabula_sapiens, gene_data];
-    }
 
     let ARCHS4_link = <a href="https://maayanlab.cloud/archs4" target="_blank" rel="noopener noreferrer">ARCHS4</a>;
     let GTEx_transcriptomics_link = <a href="https://gtexportal.org/home" target="_blank" rel="noopener noreferrer">GTEx transcriptomics</a>;
@@ -221,26 +226,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4}/>
-                            <div style={{ height: '13000px' }}>
-                                <Plot
-                                    data={archs4_data}
-                                    layout={{
-                                        title: archs4_title,
-                                        yaxis: {
-                                            automargin: true
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'RNA counts',
-                                            }
-                                        },
-                                        showlegend: false,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={archs4} labels_x={archs4_names_x} labels_y={archs4_names_y} title={archs4_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
                         :
@@ -253,24 +240,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcriptomics}/>
-                            <div style={{ height: '1500px' }}>
-                                <Plot
-                                    data={gtex_data}
-                                    layout={{
-                                        title: gtex_transcriptomics_title, yaxis: { automargin: true },
-                                        xaxis: {
-                                            title: {
-                                                text: 'RNA counts',
-                                            }
-                                        },
-                                        showlegend: false,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                    id={"gtex_transcriptomics"}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={gtex_transcriptomics} labels_x={gtex_transcriptomics_names_x} labels_y={gtex_transcriptomics_names_y} title={gtex_transcriptomics_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
                         :
@@ -283,26 +254,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={Tabula_Sapiens_link} database_desc={Tabula_Sapiens_desc_d} data={tabula_sapiens}/>
-                            <div style={{ height: '13000px' }}>
-                                <Plot
-                                    data={ts_data}
-                                    layout={{
-                                        title: tabula_sapiens_title,
-                                        yaxis: {
-                                            automargin: true
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'RNA counts',
-                                            }
-                                        },
-                                        showlegend: false,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={Tabula_Sapiens_link} database_desc={Tabula_Sapiens_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={tabula_sapiens} labels_x={ts_names_x} labels_y={ts_names_y} title={tabula_sapiens_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
                         :
@@ -315,26 +268,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_transcriptomics_link} database_desc={CCLE_transcriptomics_desc_d} data={ccle_transcriptomics}/>
-                            <div style={{ height: '50000px' }}>
-                                <Plot
-                                    data={[ccle_transcriptomics]}
-                                    layout={{
-                                        title: ccle_transcriptomics_title,
-                                        yaxis: {
-                                            automargin: true,
-                                            range: [-0.5, ccle_transcriptomics_length]
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'TPM',
-                                            }
-                                        }
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_transcriptomics_link} database_desc={CCLE_transcriptomics_desc_d} data={ccle_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={ccle_transcriptomics} labels_x={ccle_transcriptomics_names_x} labels_y={ccle_transcriptomics_names_y} title={ccle_transcriptomics_title} text={'TPM'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
                         <GraphMissing />
@@ -346,25 +281,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPM_link} database_desc={HPM_desc_d} data={hpm}/>
-                            <div style={{ height: '1000px' }}>
-                                <Plot
-                                    data={[hpm]}
-                                    layout={{
-                                        title: hpm_title,
-                                        yaxis: {
-                                            automargin: true
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'Average Spectral Counts',
-                                            }
-                                        }
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPM_link} database_desc={HPM_desc_d} data={hpm} horizontal={horizontal} setHorizontal={setHorizontal} />
+                            <PlotOrientation data={hpm} labels_x={hpm_names_x} labels_y={hpm_names_y} title={hpm_title} text={'Average Spectral Counts'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
                         <GraphMissing />
@@ -376,28 +294,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPA_link} database_desc={HPA_desc_d} data={hpa}/>
-                            <div style={{ height: '4500px' }}>
-                                <Plot
-                                    data={[hpa]}
-                                    layout={{
-                                        title: hpa_title,
-                                        yaxis: {
-                                            automargin: true,
-                                            range: [-0.5, hpa_length]
-                                        },
-                                        xaxis: {
-                                            "categoryorder": "array",
-                                            "categoryarray": ["Not detected", "Low", "Medium", "High"],
-                                            title: {
-                                                text: 'Tissue Expression Level',
-                                            }
-                                        },
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPA_link} database_desc={HPA_desc_d} data={hpa} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={hpa} labels_x={hpa_names_x} labels_y={hpa_names_y} title={hpa_title} text={'Tissue Expression Level'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
                         <GraphMissing />
@@ -409,26 +307,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_proteomics_link} database_desc={GTEx_proteomics_desc_d} data={gtex_proteomics}/>
-                            <div style={{ height: (gtex_proteomics_length * 50).toString() + 'px' }}>
-                                <Plot
-                                    data={[gtex_proteomics]}
-                                    layout={{
-                                        title: gtex_proteomics_title,
-                                        showlegend: false,
-                                        yaxis: {
-                                            automargin: true
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'log2(relative abundance)',
-                                            }
-                                        }
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_proteomics_link} database_desc={GTEx_proteomics_desc_d} data={gtex_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={gtex_proteomics} labels_x={gtex_proteomics_names_x} labels_y={gtex_proteomics_names_y} title={gtex_proteomics_title} text={'log2(relative abundance)'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
                         <GraphMissing />
@@ -440,26 +320,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_proteomics_link} database_desc={CCLE_proteomics_desc_d} data={ccle_proteomics}/>
-                            <div style={{ height: (ccle_proteomics_length * 25).toString() + 'px' }}>
-                                <Plot
-                                    data={[ccle_proteomics]}
-                                    layout={{
-                                        title: ccle_proteomics_title,
-                                        yaxis: {
-                                            automargin: true,
-                                            range: [-0.5, ccle_proteomics_length]
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'Normalized Protein Quantity',
-                                            }
-                                        }
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_proteomics_link} database_desc={CCLE_proteomics_desc_d} data={ccle_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={ccle_proteomics} labels_x={ccle_prot_names_x} labels_y={ccle_prot_names_y} title={ccle_proteomics_title} text={'Normalized Protein Quantity'}  horizontal={horizontal}></PlotOrientation>
                         </>
                         :
                         <GraphMissing />

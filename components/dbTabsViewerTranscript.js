@@ -4,11 +4,13 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import GeneAndGraphDescription from './geneAndGraphDescription';
 import GraphMissing from './graphMissing';
+import PlotOrientation from "./plotOrientation";
 import styles from '../styles/Main.module.css';
 import PropTypes from 'prop-types';
 import { Container} from '@mui/material';
 import dynamic from 'next/dynamic';
 import { useRuntimeConfig } from "./runtimeConfig";
+import { useState } from "react";
 
 
 const Plot = dynamic(() => import('react-plotly.js'), {
@@ -17,17 +19,17 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 
 
 export default function DbTabsViewer(props) {
-    const runtimeConfig = useRuntimeConfig()
-    var database = props.database
-    var setDatabase = props.setdatabase
-    var result = props.result
-    const transcriptStats = JSON.parse(props.transcriptStats)
-    var transcript = props.transcript
-
+    const runtimeConfig = useRuntimeConfig();
+    var database = props.database;
+    var setDatabase = props.setdatabase;
+    var result = props.result;
+    const transcriptStats = JSON.parse(props.transcriptStats);
+    var transcript = props.transcript;
+    const [horizontal, setHorizontal] = useState(true);
 
     var transcript_data = {
         type: 'box',
-        x: transcriptStats[transcript],
+        values: transcriptStats[transcript],
         name: 'input vector',
         boxmean: 'sd',
     }
@@ -62,12 +64,17 @@ export default function DbTabsViewer(props) {
 
 
     let gtex_transcript = null, archs4_transcript = null;
+    let gtex_transcript_names_x = [], gtex_transcript_names_y = [], archs4_transcript_names_x = [], archs4_transcript_names_y = [];
 
     if ('GTEx_transcript' in result.sorted_data) {
         gtex_transcript = result.sorted_data.GTEx_transcript;
+        gtex_transcript_names_x = {"x": gtex_transcript.names.slice().reverse(), orientation: 'v'}
+        gtex_transcript_names_y = {"y": gtex_transcript.names, orientation: 'h'}
     }
     if ('ARCHS4_transcript' in result.sorted_data) {
         archs4_transcript = result.sorted_data.ARCHS4_transcript;
+        archs4_transcript_names_x = {"x": archs4_transcript.names.slice().reverse(), orientation: 'v'}
+        archs4_transcript_names_y = {"y": archs4_transcript.names, orientation: 'h'}
     } 
    
 
@@ -113,26 +120,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} transcript={transcript} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4_transcript}/>
-                            <div style={{ height: '13000px' }}>
-                                <Plot
-                                    data={[archs4_transcript, transcript_data]}
-                                    layout={{
-                                        title: archs4_title,
-                                        yaxis: {
-                                            automargin: true
-                                        },
-                                        xaxis: {
-                                            title: {
-                                                text: 'RNA counts',
-                                            }
-                                        },
-                                        showlegend: false,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} transcript={transcript} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={archs4_transcript} labels_x={archs4_transcript_names_x} labels_y={archs4_transcript_names_y} title={archs4_title} text={'RNA Counts'} horizontal={horizontal} genedata={transcript_data}/>
                         </>
 
                         :
@@ -145,24 +134,8 @@ export default function DbTabsViewer(props) {
                         ?
                         <>
                             <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} transcript={transcript} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcript}/>
-                            <div style={{ height: '1500px' }}>
-                                <Plot
-                                    data={[gtex_transcript, transcript_data]}
-                                    layout={{
-                                        title: gtex_transcriptomics_title, yaxis: { automargin: true },
-                                        xaxis: {
-                                            title: {
-                                                text: 'RNA counts',
-                                            }
-                                        },
-                                        showlegend: false,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    config={{ responsive: true }}
-                                    id={"gtex_transcript"}
-                                />
-                            </div>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} transcript={transcript} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            <PlotOrientation data={gtex_transcript} labels_x={gtex_transcript_names_x} labels_y={gtex_transcript_names_y} title={gtex_transcriptomics_title} text={'RNA Counts'} horizontal={horizontal} genedata={transcript_data}/>
                         </>
                         :
                         <GraphMissing />

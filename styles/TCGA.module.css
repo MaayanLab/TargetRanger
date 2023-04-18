@@ -12,6 +12,14 @@
     align-items: center;
 }
 
+.upArrowButton {
+  position: fixed;
+  bottom: 50px;
+  right: 10px;
+  margin-bottom: 215px;
+  z-index: 4;
+}
+
 .card {
   text-align: center;
   margin: 20px;
