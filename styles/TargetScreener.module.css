@@ -100,7 +100,13 @@
   .fileText {
     margin: 8px;
   }
-
+  
+  .sidePanel {
+    display: flex;
+    padding-left: 50px;
+    padding-right: 20px;
+    margin-right: 20px;
+  }
 
 
   @media only screen and (max-width: 1315px) {
