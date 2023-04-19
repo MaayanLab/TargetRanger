@@ -35,12 +35,17 @@ export default function Results() {
   var initSecretedVal;
   var results;
   var transcript_level;
+  var initGene = '';
+  var initTranscript = '';
 
   try {
     initMembraneVal = JSON.parse(router.query['membraneGenes']);
     initSecretedVal = JSON.parse(router.query['secretedGenes']);
     transcript_level = JSON.parse(router.query['transcript_level']);
+    
     results = JSON.parse(string_res);
+    initGene = results[0].gene
+    if (transcript_level) initTranscript = results[0].transcript
   } catch {
     initMembraneVal = false;
     initSecretedVal = false;
@@ -135,7 +140,7 @@ export default function Results() {
   }, [membraneGenes, secretedGenes])
 
   // Try to display results --> on reload direct them back to the Target Screener page
-  if (results) {
+  if (results != null) {
     // Use membraneGene state to determine filter
 
     return (

@@ -140,7 +140,7 @@ export default function Page() {
                 const res = await r.json();
                 submitGeneStats(res.stats, res.counts);
             });
-        }, [level])
+        }, [level, submitGeneStats])
 
     const fetchFileStats = useCallback(async (text) => { 
         const r = await fetch(`/api/fileparse`, {
@@ -151,9 +151,8 @@ export default function Page() {
             body: JSON.stringify({ level: level, text: text })
         });
         const res = await r.json();
-        console.log(res);
         submitGeneStats(res.stats, res.counts);
-        }, [file, level])
+        }, [level, submitGeneStats])
     
     const handleFileRead = useCallback(() => {
         const content = fileReader.current.result;
@@ -190,7 +189,7 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }, [file, handleFileChosen, useDefaultFile, level]);
+    }, [file, useDefaultFile, level, runtimeConfig.NEXT_PUBLIC_DOWNLOADS, fetchDataset, handleFileChosen]);
 
     // For input file example table
     const rows = [

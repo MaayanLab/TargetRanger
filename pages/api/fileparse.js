@@ -79,13 +79,11 @@ export default async function handler(req, res) {
 
         if (text != null) {
             var rows = text.split(/\r?\n/)
-            console.log('recieved text')
             if (text[1].includes(',')) {
                 rows = rows.map(row => row.split(',').map(col => /^"?(.*?)"?$/.exec(col)[1]))
             } else {
                 rows = rows.map(row => row.split('\t'))
             }
-            console.log('sending to calcFileStats')
             calcFileStats(rows, level)
         }
         res.status(200).json(result);

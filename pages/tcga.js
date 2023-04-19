@@ -110,7 +110,7 @@ export default function Page() {
                 const res = await r.json();
                 submitGeneStats(res.stats, res.counts);
             });
-        })
+        }, [submitGeneStats])
 
     const onClickSubmit = (e) => {
         setLoading(true);
@@ -190,8 +190,7 @@ export default function Page() {
                         </Button>
 
                     </DialogActions>
-                </Dialog>
-                
+                </Dialog>     
                 <Autocomplete
                     disablePortal
                     disableClearable
