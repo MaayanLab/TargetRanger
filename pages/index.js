@@ -124,7 +124,7 @@ export default function Page() {
             setLoading(false)
             alert('Error with returned data')
         })
-    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
+    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName, level])
 
 
     const fetchDataset = useCallback((endpoint) => { 
@@ -140,7 +140,7 @@ export default function Page() {
                 const res = await r.json();
                 submitGeneStats(res.stats, res.counts);
             });
-        }, [level])
+        }, [level, submitGeneStats])
 
     const fetchFileStats = useCallback(async (text) => { 
         const r = await fetch(`/api/fileparse`, {
@@ -151,9 +151,8 @@ export default function Page() {
             body: JSON.stringify({ level: level, text: text })
         });
         const res = await r.json();
-        console.log(res);
         submitGeneStats(res.stats, res.counts);
-        }, [file, level])
+        }, [level, submitGeneStats])
     
     const handleFileRead = useCallback(() => {
         const content = fileReader.current.result;
@@ -190,7 +189,7 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }, [file, submitGeneStats, useDefaultFile, level]);
+    }, [file, useDefaultFile, level, runtimeConfig.NEXT_PUBLIC_DOWNLOADS, fetchDataset, handleFileChosen]);
 
     // For input file example table
     const rows = [
@@ -210,7 +209,7 @@ export default function Page() {
                 setFileLoading(false)
             }, 3000)
         }
-    }, [fileLoading])
+    }, [fileLoading, file, useDefaultFile])
 
     // For MUI Popover
 

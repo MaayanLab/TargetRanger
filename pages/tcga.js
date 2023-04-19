@@ -109,7 +109,7 @@ export default function Page() {
                 const res = await r.json();
                 submitGeneStats(res.stats, res.counts);
             });
-        })
+        }, [submitGeneStats])
 
     const onClickSubmit = (e) => {
         setLoading(true);
@@ -186,7 +186,7 @@ export default function Page() {
 
                     </DialogActions>
                 </Dialog>
-                <p>Explore clustered expression groupings from the pan-cancer RNA-seq data collected by the <a href='https://www.cancer.gov/ccg/research/genome-sequencing/tcga' target='_blank'>TCGA</a>. Seach for a specific cancer type below:</p>
+                <p>Explore clustered expression groupings from the pan-cancer RNA-seq data collected by the <a href='https://www.cancer.gov/ccg/research/genome-sequencing/tcga' target='_blank' rel="noreferrer">TCGA</a>. Seach for a specific cancer type below:</p>
                 <Autocomplete
                     disablePortal
                     disableClearable
