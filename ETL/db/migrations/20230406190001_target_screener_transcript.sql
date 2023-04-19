@@ -4,24 +4,17 @@
 
 create extension if not exists "plpython3u";
 
-DROP MATERIALIZED VIEW IF EXISTS database_agg;
+create materialized view database_agg_transcript as
+select
+  data_transcript.id as id,
+  data_transcript.database as database,
+  data_transcript.transcript as transcript,
+  aggregate_stats(data_transcript.values) as values
+from data_transcript;
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS database_agg AS
-SELECT
-    data.id AS id,
-    data.database AS database,
-    data.gene AS gene,
-    NULL::uuid AS transcript,
-    aggregate_stats(data.values) AS values
-FROM data
-UNION ALL
-SELECT
-    data_transcript.id AS id,
-    data_transcript.database AS database,
-    NULL::uuid AS gene,
-    data_transcript.transcript AS transcript,
-    aggregate_stats(data_transcript.values) AS values
-FROM data_transcript;
+create unique index database_agg_trancript_id_idx on database_agg_transcript (id);
+create index database_agg_trancript_database_idx on database_agg_transcript (database);
+
 
 create view mapper AS (
 select
@@ -84,11 +77,11 @@ create function screen_targets_transcript_vectorized(input_data jsonb, backgroun
     select
       input_data_each.transcript,
       input_data_each.values as input_data,
-      database_agg.values as background_data
+      database_agg_transcript.values as background_data
     from input_data_each
     inner join transcript on transcript.transcript = input_data_each.transcript
-    inner join database_agg on database_agg.transcript = transcript.id
-    where database_agg.database = background
+    inner join database_agg_transcript on database_agg_transcript.transcript = transcript.id
+    where database_agg_transcript.database = background
   ),
   vectorized_stats as (
     select
@@ -132,6 +125,8 @@ $$ language sql immutable;
 
 -- migrate:down
 
+drop index database_agg_transcript_database_idx;
+drop unique index database_agg_transcript_id_idx;
 drop function screen_targets_transcript_vectorized(input_data jsonb, background uuid);
 drop type welchs_t_test_vectorized_transcript_results;
 drop view mapper;

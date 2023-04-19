@@ -370,11 +370,11 @@ CREATE FUNCTION public.screen_targets_transcript_vectorized(input_data jsonb, ba
     select
       input_data_each.transcript,
       input_data_each.values as input_data,
-      database_agg.values as background_data
+      database_agg_transcript.values as background_data
     from input_data_each
     inner join transcript on transcript.transcript = input_data_each.transcript
-    inner join database_agg on database_agg.transcript = transcript.id
-    where database_agg.database = background
+    inner join database_agg_transcript on database_agg_transcript.transcript = transcript.id
+    where database_agg_transcript.database = background
   ),
   vectorized_stats as (
     select
@@ -603,13 +603,18 @@ CREATE MATERIALIZED VIEW public.database_agg AS
  SELECT data.id,
     data.database,
     data.gene,
-    NULL::uuid AS transcript,
     public.aggregate_stats(data."values") AS "values"
    FROM public.data
-UNION ALL
+  WITH NO DATA;
+
+
+--
+-- Name: database_agg_transcript; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.database_agg_transcript AS
  SELECT data_transcript.id,
     data_transcript.database,
-    NULL::uuid AS gene,
     data_transcript.transcript,
     public.aggregate_stats(data_transcript."values") AS "values"
    FROM public.data_transcript
@@ -769,6 +774,34 @@ CREATE INDEX data_database_fkey ON public.data USING btree (database);
 --
 
 CREATE INDEX data_gene_fkey ON public.data USING btree (gene);
+
+
+--
+-- Name: database_agg_database_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX database_agg_database_idx ON public.database_agg USING btree (database);
+
+
+--
+-- Name: database_agg_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX database_agg_id_idx ON public.database_agg USING btree (id);
+
+
+--
+-- Name: database_agg_trancript_database_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX database_agg_trancript_database_idx ON public.database_agg_transcript USING btree (database);
+
+
+--
+-- Name: database_agg_trancript_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX database_agg_trancript_id_idx ON public.database_agg_transcript USING btree (id);
 
 
 --
