@@ -25,6 +25,7 @@ export async function getStaticProps() {
 
 
     spec.paths['/api/query_db_targets'].post.tags = ['query_db_targets'];
+    spec.paths['/api/query_db_targets_transcript'].post.tags = ['query_db_targets_transcript'];
   
     return {
       props: {

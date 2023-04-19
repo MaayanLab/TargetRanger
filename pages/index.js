@@ -108,17 +108,25 @@ export default function Page() {
         const bg = databases.get(precomputedBackground)
 
         var inputData = { 'inputData': fileStats, 'bg': bg }
-        if (!level) {
-            inputData['transcript'] = true;
+        var res;
+        if (level) {
+            res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inputData)
+            })
+        } else {
+            res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets_transcript`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inputData)
+            })
         }
-        console.log(inputData)
-        let res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(inputData)
-        })
+       
         let json = await res.json();
         var targets = [];
         var included = [];

@@ -21,14 +21,14 @@ export default async function handler(req, res) {
 
         var result = [];
 
-        
+
         result = await prisma.$queryRaw
             `
                 with cte as (
                     select
                         row_number() over (order by t desc) as index,
-                        gene, t, p, adj_p, log2fc
-                    from screen_targets_vectorized(
+                        transcript, gene, t, p, adj_p, log2fc
+                    from screen_targets_transcript_vectorized(
                         ${input_data}::jsonb,
                         (
                             select database.id
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
                         )
                     )
                     order by t desc
-                ) select gene, t, p, adj_p, log2fc from cte
+                ) select transcript, gene, t, p, adj_p, log2fc from cte
                 where index < 100 or p < 0.05;
             `
 

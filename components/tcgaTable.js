@@ -32,14 +32,18 @@ export default function TCGATable(props) {
         { field: "cluster", headerName: "Cluster", minWidth: 60, flex: 1},
         { field: "n", headerName: "# Samples", type: "number", minWidth: 80, flex: 1 },
         { field: "mutations", headerName: "Common Mutations", type: "number", minWidth: 160, renderCell: (cellValues) => {
+           
+            if (Object.keys(cellValues.row.mutations).length > 0) {
             const mutationString = Object.keys(cellValues.row.mutations).map(el => el + ': ' +cellValues.row.mutations[el].toString()).join(', ')
             const preview = `${mutationString.split(',')[0].split(' ')[0]}  (${mutationString.split(',')[0].split(' ')[2]})`
-            console.log(mutationString)
+            
             return (
                 <Tooltip title={mutationString}>
                      <span style={{justifyItems: 'center', textAlign: 'center'}}>{preview}.. <PreviewIcon/></span>
                 </Tooltip>
-            )
+            )} else {
+                return <p>NA</p>
+            }
         }
         },
         {
