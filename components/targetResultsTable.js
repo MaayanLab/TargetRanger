@@ -174,6 +174,10 @@ export default function TargetResultTable(props) {
         } else {
             results[i]['adj_p'] = Number.parseFloat(pval).toFixed(4)
         }
+        if (pval == null) {
+          results[i]['adj_p'] = 1
+          results[i]['p'] = 1
+        }
         results[i]['log2fc'] = Number.parseFloat(results[i]['log2fc']).toFixed(2)
     }
 
@@ -183,6 +187,11 @@ export default function TargetResultTable(props) {
                 rows={results}
                 columns={columns}
                 filterModel={filt}
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: 'adj_p', sort: 'asc' }],
+                  },
+                }}
                 sx={{
                   boxShadow: 2,
                   border: 2,

@@ -22,35 +22,11 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-function stddev(arr) {
-    // Creating the mean with Array.reduce
-    let mean = arr.reduce((acc, curr) => {
-        return acc + parseFloat(curr)
-    }, 0) / arr.length
-
-    // Assigning (value - mean) ^ 2 to every array item
-    arr = arr.map((k) => {
-        return (k - mean) ** 2
-    })
-
-    // Calculating the sum of updated array
-    let sum = arr.reduce((acc, curr) => acc + curr, 0);
-
-    // Calculating the variance
-    let variance = sum / arr.length
-
-    let std = Math.sqrt(variance)
-    // Returning the standard deviation
-    return [mean, std]
-}
-
-
 const Plot = dynamic(() => import('react-plotly.js'), {
     ssr: false,
 });
 
 const categories = Object.keys(datasets)
-
 
 
 export default function Page() {
@@ -120,37 +96,24 @@ export default function Page() {
         })
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, router, fileName])
 
-    const calcFileStats = useCallback((rows) => {
-        var n = rows[0].length - 1
-        var geneCounts = {}
-        var geneStats = {}
-        var gene;
-        var data;
-        var stats;
-        for (let i = 1; i < rows.length; i++) {
-            gene = rows[i].slice(0, 1)[0]
-            data = rows[i].slice(1, rows.legnth)
-            stats = stddev(data)
-            if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                if (gene.includes('.')) {
-                    gene = gene.split('.')[0]
-                }
-                var convertedSymbol = conversionDict[gene] || gene;
-                geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
-                geneCounts[convertedSymbol] = data.map(x => parseInt(x));
-            }
-        }
-        submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-    }, [submitGeneStats])
-
+    const fetchDataset = useCallback((endpoint) => { 
+        fetch(endpoint).then((r) => r.text())
+            .then(async (text) => {
+                const r = await fetch(`/api/fileparse`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ level: true, text: text })
+                });
+                const res = await r.json();
+                submitGeneStats(res.stats, res.counts);
+            });
+        })
 
     const onClickSubmit = (e) => {
         setLoading(true);
-        fetch(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'TCGA/' + fileName).then((r) => r.text())
-            .then(text => {
-                const rows = text.split('\n').map(row => row.split('\t'));
-                calcFileStats(rows);
-            });
+        fetchDataset(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'TCGA/' + fileName)
         handleClose();
     }
 

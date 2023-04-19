@@ -1,16 +1,11 @@
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styles from '../styles/TargetScreener.module.css';
 import Footer from '../components/footer';
 import Header from '../components/header';
 import Head from '../components/head';
 import SideBar from '../components/sideBar';
-import exampleData from '../public/files/GSE49155.json';
-import exampleCounts from '../public/files/GSE49155-counts.json';
-import exampleDataTranscript from '../public/files/GSE49155-transcript.json';
-import exampleCountsTranscript from '../public/files/GSE49155-counts-transcript.json';
-import conversionDict from '../public/files/conversion_dict.json'
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -40,32 +35,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { Alert } from '@mui/material';
 import { Drawer, Link } from '@mui/material';
 import { useRuntimeConfig } from '../components/runtimeConfig';
-import { useCallback } from 'react';
 import { IconButton, LinearProgress } from '@mui/material';
-import { FormatUnderlined } from '@mui/icons-material';
 
-
-function stddev(arr) {
-    // Creating the mean with Array.reduce
-    let mean = arr.reduce((acc, curr) => {
-        return acc + parseFloat(curr)
-    }, 0) / arr.length
-
-    // Assigning (value - mean) ^ 2 to every array item
-    arr = arr.map((k) => {
-        return (k - mean) ** 2
-    })
-
-    // Calculating the sum of updated array
-    let sum = arr.reduce((acc, curr) => acc + curr, 0);
-
-    // Calculating the variance
-    let variance = sum / arr.length
-
-    let std = Math.sqrt(variance)
-    // Returning the standard deviation
-    return [mean, std]
-}
 
 const databases = new Map([
     [0, 'ARCHS4'],
@@ -76,9 +47,9 @@ const databases = new Map([
 ]);
 
 
+
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
-    var fileReader = useRef(null);
 
     // For MUI loading icon
 
@@ -103,31 +74,24 @@ export default function Page() {
 
     const router = useRouter();
 
+    var fileReader = useRef(null);
+
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
         const bg = databases.get(precomputedBackground)
 
         var inputData = { 'inputData': fileStats, 'bg': bg }
         var res;
-        if (level) {
-            res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(inputData)
-            })
-        } else {
-            res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/query_db_targets_transcript`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(inputData)
-            })
-        }
+        res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/${ level ? 'query_db_targets' : 'query_db_targets_transcript'}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(inputData)
+        })
        
         let json = await res.json();
+        
         var targets = [];
         var included = [];
         if (level) {
@@ -162,70 +126,63 @@ export default function Page() {
         })
     }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName])
 
-    const calcFileStats = useCallback((rows) => {
-        var n = rows[0].length - 1
-        var geneCounts = {}
-        var geneStats = {}
-        var gene;
-        var data;
-        var stats;
-        for (let i = 1; i < rows.length; i++) {
-            gene = rows[i].slice(0, 1)[0]
-            data = rows[i].slice(1, rows.legnth)
-            stats = stddev(data)
-            if (stats[0] !== null && (stats[1] != 0 && stats[0] != 0) && gene != '') {
-                if (gene.includes('.')) {
-                    gene = gene.split('.')[0]
-                }
-                if (level) {
-                    var convertedSymbol = conversionDict[gene] || gene;
-                    geneStats[convertedSymbol] = { 'std': stats[1], 'mean': stats[0] };
-                    geneCounts[convertedSymbol] = data.map(x => parseInt(x));
-                } else {
-                    geneStats[gene] = { 'std': stats[1], 'mean': stats[0] };
-                    geneCounts[gene] = data.map(x => parseInt(x));
-                }
-            }
-        }
-        if (level) {
-            submitGeneStats({ 'genes': geneStats, 'n': n }, geneCounts)
-        } else {
-            submitGeneStats({ 'transcripts': geneStats, 'n': n }, geneCounts)
-        }
-    }, [submitGeneStats, level])
 
+    const fetchDataset = useCallback((endpoint) => { 
+        fetch(endpoint).then((r) => r.text())
+            .then(async (text) => {
+                const r = await fetch(`/api/fileparse`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ level: level, text: text })
+                });
+                const res = await r.json();
+                submitGeneStats(res.stats, res.counts);
+            });
+        }, [level])
 
-    const handleFileRead = useCallback((e) => {
-
+    const fetchFileStats = useCallback(async (text) => { 
+        const r = await fetch(`/api/fileparse`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ level: level, text: text })
+        });
+        const res = await r.json();
+        console.log(res);
+        submitGeneStats(res.stats, res.counts);
+        }, [file, level])
+    
+    const handleFileRead = useCallback(() => {
         const content = fileReader.current.result;
-
-        var rows = content.split(/\r?\n/)
-        if (rows[1].includes(',')) {
-            rows = rows.map(row => row.split(',').map(col => /^"?(.*?)"?$/.exec(col)[1]))
-        } else {
-            rows = rows.map(row => row.split('\t'))
-        }
-        calcFileStats(rows);
-    }, [fileReader, calcFileStats]);
+        fetchFileStats(content);
+    }, [fetchFileStats])
 
 
-    const handleFileChosen = useCallback((file) => {
+    const handleFileChosen = useCallback(() => {
+        
         fileReader.current = new FileReader();
         fileReader.current.onloadend = handleFileRead;
         fileReader.current.readAsText(file);
-    }, [handleFileRead, fileReader]);
+    }, [file, handleFileRead]);
+
+    
 
 
-    const submitFile = useCallback(() => {
+    const submitFile = useCallback(async () => {
         if (useDefaultFile != false || file != null) {
             if (useDefaultFile) {
                 setLoading(true);
                 if (level) {
-                    submitGeneStats(exampleData, exampleCounts)
-                } else submitGeneStats(exampleDataTranscript, exampleCountsTranscript)
+                    fetchDataset(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient.tsv')
+                } else {
+                    fetchDataset(runtimeConfig.NEXT_PUBLIC_DOWNLOADS + 'Cancer/GSE49155-patient-transcript.tsv')
+                }
             } else {
                 setLoading(true);
-                handleFileChosen(file)
+                handleFileChosen()
             }
         } else {
             setAlert(<Alert variant="outlined" severity="error">Please select a file to submit</Alert>)
@@ -233,7 +190,7 @@ export default function Page() {
                 setAlert('');
             }, 3000);
         }
-    }, [file, handleFileChosen, submitGeneStats, useDefaultFile]);
+    }, [file, submitGeneStats, useDefaultFile, level]);
 
     // For input file example table
     const rows = [
