@@ -15,7 +15,6 @@ import cancer_map from '../public/files/cancer_type.json';
 import TCGATable from '../components/tcgaTable';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
-import conversionDict from '../public/files/conversion_dict.json'
 import { useRouter } from "next/router";
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import Dialog from '@mui/material/Dialog';
@@ -28,7 +27,7 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 });
 
 const categories = Object.keys(datasets)
-
+const categories_search = categories.map(c => `${c} (${cancer_map[c]})`)
 
 export default function Page() {
     const runtimeConfig = useRuntimeConfig()
@@ -196,15 +195,14 @@ export default function Page() {
                     disableClearable
                     freeSolo={false}
                     value={''}
-                    options={categories}
+                    options={categories_search}
                     sx={{ width: 400 }}
                     color="secondary"
                     onChange={(event, value) => {
-                        var elt = document.getElementById(value)
+                        var elt = document.getElementById(value.split(' ')[0])
                         elt.scrollIntoView()
-
                     }}
-                    renderInput={(params) => <TextField {...params} color="secondary" label="Type" />}
+                    renderInput={(params) => <TextField {...params} color="secondary" label="Cancer Type" />}
                 />
                 {categories.map((el) => {
                     const TCGA_link = 'https://portal.gdc.cancer.gov/projects/TCGA-' + el;
