@@ -13,7 +13,7 @@ export default function Header() {
                         <img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/logo.png'} alt="App Logo" width={75} height={75} />
                     </Link>
                     <Link href="targetscreener">
-                        <h1 style={{fontSize: '40px'}}>TargetRanger</h1>
+                        <h1 style={{fontSize: '35px'}}>TargetRanger</h1>
                     </Link>
                 </div>
 
@@ -33,7 +33,7 @@ export default function Header() {
                             <img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/logo.png'} alt="App Logo" width={75} height={75} />
                         </Link>
                         <Link href="targetscreener">
-                            <h1 style={{fontSize: '40px'}}>TargetRanger</h1>
+                            <h1 style={{fontSize: '35px'}}>TargetRanger</h1>
                         </Link>
                     </div>
                     <div className={styles.rightDiv}>
