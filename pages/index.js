@@ -229,7 +229,7 @@ export default function Page() {
 
             <div className={styles.mainDiv}>
                 <Header />
-                <Box className={styles.rowFlexbox}>
+                <Box className={styles.rowFlexbox} sx={{paddingBottom: '50px'}}>
                     <div className={styles.sidePanel}>
                         <Box
                             sx={{ width: '375px', height: '100%' }}

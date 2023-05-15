@@ -89,7 +89,7 @@ export default function SideBar(props) {
 
 
     return (
-            <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: '20px'}}>
                 <div>
                         <Box
                             sx={{ width: '375px', height: '100%' }}

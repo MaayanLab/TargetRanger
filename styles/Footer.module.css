@@ -4,14 +4,35 @@
     width: 100%;
     justify-content: space-evenly;
     align-items: center;
-    background-color: #cea6dc;
+    background-color:#cea6dc;
     padding-top: 15px;
     padding-bottom: 15px;
-    gap: 30px;
     position: absolute;
     bottom: 0px;
+    gap: 5px;
     z-index: 5;
 }
+
+.horizontalFlexbox {
+    display: flex;
+    text-align: center;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .verticalFlexbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    /* flex-wrap: wrap; */
+    align-items: center;
+    width: 100%;
+}
+
   
 .footerLinks {
     display: flex;
@@ -38,6 +59,11 @@
 
 .buttonLink {
     text-decoration: none;
+}
+
+.publication {
+    font-size: xx-small;
+    text-align: center;
 }
 
 @media only screen and (max-width: 830px) {
