@@ -46,7 +46,7 @@ export default function Page(props) {
 
                 <Header/>
 
-                <div style={{width: '90%', marginBottom: '150px'}}>
+                <div style={{width: '90%', marginBottom: '200px'}}>
                     <SwaggerUI spec={props.spec}/>
                 </div>
             
