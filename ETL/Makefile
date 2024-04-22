@@ -235,6 +235,11 @@ ingest/ARCHS4_transcript.sql: input/archs4-transcript-stats-clean.tsv.gz
 	mkdir -p ingest
 	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@ -m
 
+ingest/CCLE_mappings.sql: preprocessed/CCLE_mappings.tsv
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 13_ingest_CCLE_mapping.py -i $< -o $@ -m
+
 .PHONY: ingest
 ingest: ingest/gene_info ingest/ARCHS4 ingest/GTEx_transcriptomics ingest/Tabula_Sapiens ingest/HPM ingest/HPA ingest/GTEx_proteomics ingest/CCLE_Transcriptomics ingest/CCLE_Proteomics ingest/GTEx_transcript ingest/ARCHS4_transcript
 

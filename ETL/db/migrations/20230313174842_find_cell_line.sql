@@ -16,7 +16,9 @@ create function cell_line_ppc_vectorized(a_mean double precision[], input_backgr
   gene_order = []
 
   for d in input_background:
-    expr = json.loads(d['values'])['value']
+    input_bg_data = json.loads(d['values'])
+    print(input_background)
+    expr = input_bg_data['value']
     gene = d['gene']
     for cl in expr:
       if cl not in cell_lines_dict:

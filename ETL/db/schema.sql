@@ -111,6 +111,37 @@ CREATE TYPE public.welchs_t_test_vectorized_transcript_results AS (
 
 
 --
+-- Name: agg_mean_std_count(jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.agg_mean_std_count(stats jsonb) RETURNS jsonb
+    LANGUAGE plpython3u IMMUTABLE
+    AS $$
+  if not stats: return None
+  import numpy as np
+  import pandas as pd
+  import json
+
+  def combined_mean(means, ns):
+    if ns.sum() == 0: return float('nan')
+    return (means * ns).sum() / ns.sum()
+
+  def combined_std(stds, ns, means):
+    if ns.sum() == 0: return float('nan')
+    mean = combined_mean(means, ns)
+    ds = means - mean
+    return (((ns*stds**2).sum() + (ns*ds**2).sum()) / ns.sum())**(1/2)
+
+  stats_df = pd.DataFrame(json.loads(stats)).dropna()
+  return pd.Series({
+    'mean': combined_mean(stats_df['mean'], stats_df['count']),
+    'std': combined_std(stats_df['std'], stats_df['count'], stats_df['mean']),
+    'count': stats_df['count'].sum(),
+  }).to_json()
+$$;
+
+
+--
 -- Name: aggregate_stats(jsonb); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -225,14 +256,77 @@ CREATE FUNCTION public.cell_line_ppc_vectorized(a_mean double precision[], input
   cell_lines_dict = {}
 
   gene_order = []
-
+  print(input_background[0].keys())
   for d in input_background:
-    expr = json.loads(d['values'])['value']
+    input_bg_data = json.loads(d['values'])
+    expr = input_bg_data['value']
     gene = d['gene']
     for cl in expr:
       if cl not in cell_lines_dict:
         cell_lines_dict[cl] = []
       cell_lines_dict[cl].append(expr[cl])
+
+  result = []
+  for cell_line in cell_lines_dict:
+      result.append((cell_line, np.corrcoef(np.log(np.array(a_mean) + 1), np.log(np.array(cell_lines_dict[cell_line]) + 1))[0][1]))
+
+  return result
+$$;
+
+
+--
+-- Name: cell_line_ppc_vectorized(double precision[], jsonb, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cell_line_ppc_vectorized(a_mean double precision[], input_background jsonb, cell_line_target character varying) RETURNS SETOF public.cell_line_results
+    LANGUAGE plpython3u IMMUTABLE PARALLEL SAFE
+    AS $$
+  import numpy as np
+  import json
+
+  cell_lines_dict = json.loads(input_background)
+  result = []
+
+  for cell_line, vals in cell_lines_dict.items():
+    if cell_line_target == 'All' or cell_line.split(' - ')[0] == cell_line_target:
+      print(f"a_mean for {cell_line}: {a_mean}")
+      print(f"values for {cell_line}: {vals}")
+      pcc = np.corrcoef(np.log(np.array(a_mean) + 1), np.log(np.array(vals) + 1))[0][1]
+      if pcc > 0:
+        result.append((cell_line, pcc))
+
+  return result
+$$;
+
+
+--
+-- Name: cell_line_ppc_vectorized(double precision[], public.data_complete[], character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cell_line_ppc_vectorized(a_mean double precision[], input_background public.data_complete[], cell_line_target character varying) RETURNS public.cell_line_results[]
+    LANGUAGE plpython3u IMMUTABLE
+    AS $$
+  import numpy as np
+  import json
+
+  cell_lines_dict = {}
+
+  gene_order = []
+  print(input_background[0].keys())
+  for d in input_background:
+    input_bg_data = json.loads(d['values'])
+    expr = input_bg_data['value']
+    gene = d['gene']
+    for cl in expr:
+      if cell_line_target == 'All':
+        if cl not in cell_lines_dict:
+            cell_lines_dict[cl] = []
+        cell_lines_dict[cl].append(expr[cl])
+      else:
+        if cl.split(' - ')[0] == cell_line_target:
+          if cl not in cell_lines_dict:
+            cell_lines_dict[cl] = []
+          cell_lines_dict[cl].append(expr[cl])
 
   result = []
   for cell_line in cell_lines_dict:
@@ -262,8 +356,8 @@ $$;
 -- Name: screen_cell_lines_vectorized(jsonb, character varying); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.screen_cell_lines_vectorized(input_data jsonb, background character varying) RETURNS SETOF public.cell_line_results
-    LANGUAGE sql IMMUTABLE
+CREATE FUNCTION public.screen_cell_lines_vectorized(input_data jsonb, cell_line_target character varying) RETURNS SETOF public.cell_line_results
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
     AS $$
   with
   input_data_each as (
@@ -273,33 +367,29 @@ CREATE FUNCTION public.screen_cell_lines_vectorized(input_data jsonb, background
     from jsonb_each(input_data->'genes') as j
   ),
   input_background as (
+  select
+    sub.cell_line,
+    array_agg((sub.values->>'mean')::double precision) as a_mean,
+    jsonb_object_agg(sub.cell_line, sub.value_arr) as background_data
+  from (
     select
-      input_data_each.gene,
-      input_data_each.values as input_data,
-      data_complete as background_data
+      ccle_transcriptomics_data.cell_line,
+      input_data_each.values,
+      array_agg(ccle_transcriptomics_data.value) as value_arr
     from input_data_each
     inner join gene on gene.gene = input_data_each.gene
-    inner join data_complete on data_complete.gene = gene.gene
-    where data_complete.dbname = background
-  ),
-  vectorized_stats as (
-    select
-      cell_line_ppc_vectorized(
-        array_agg((input_data->>'mean')::double precision),
-        array_agg((background_data)::data_complete)
-      ) as value
-    from input_background
-  ),
-  stats as (
-    select r.*
-    from
-      vectorized_stats,
-      unnest(vectorized_stats.value) r
-    where
-      r.pcc >= 0
-  )
+    inner join ccle_transcriptomics_data on ccle_transcriptomics_data.gene = gene.gene
+    group by ccle_transcriptomics_data.cell_line, input_data_each.values
+  ) as sub
+  group by sub.cell_line
+),
+vectorized_stats as (
+  select
+    cell_line_ppc_vectorized(a_mean, background_data, cell_line_target)
+  from input_background
+)
 select *
-from stats
+from vectorized_stats
 $$;
 
 
@@ -472,6 +562,40 @@ $$;
 
 
 --
+-- Name: unified_data_complete(character varying, character varying[]); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.unified_data_complete(gene character varying, dbnames character varying[]) RETURNS jsonb
+    LANGUAGE sql IMMUTABLE
+    AS $_$
+with cte as (
+  select
+    db.dbname,
+    dtv."desc" as "desc",
+    jsonb_object_agg(
+      utm."term",
+      ((tv."value"::double precision) - (dd.dist->>'mean')::double precision) / (dd.dist->>'std')::double precision
+    ) as "term_value"
+  from
+    unnest(dbnames) dbn (dbname)
+    inner join database db on db.dbname = dbn.dbname
+    inner join database_dist dd on dd.database = db.id
+    inner join data d on d.database = db.id
+    inner join gene g on d.gene = g.id,
+    jsonb_each(d."values") as dtv("desc", "term_value"),
+    jsonb_each_text(dtv."term_value") as tv("term", "value")
+    inner join unified_term_map utm on tv."term" = utm."original_term"
+  where g.gene = $1
+  group by db.dbname, dtv."desc"
+), cte2 as (
+  select cte."dbname", jsonb_object_agg(cte."desc", cte."term_value") as "values"
+  from cte
+  group by dbname
+) select jsonb_object_agg("dbname", "values") from cte2;
+$_$;
+
+
+--
 -- Name: welchs_t_test(double precision, double precision, double precision, double precision, double precision, double precision, boolean, character varying); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -556,6 +680,19 @@ $$;
 
 
 --
+-- Name: ccle_transcriptomics_data; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.ccle_transcriptomics_data AS
+ SELECT d.gene,
+    (jsonb_each_text(jsonb_extract_path(d."values", VARIADIC ARRAY['value'::text]))).key AS cell_line,
+    ((jsonb_each_text(jsonb_extract_path(d."values", VARIADIC ARRAY['value'::text]))).value)::double precision AS value
+   FROM public.data_complete d
+  WHERE ((d.dbname)::text = 'CCLE_transcriptomics'::text)
+  WITH NO DATA;
+
+
+--
 -- Name: data_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -622,6 +759,28 @@ CREATE MATERIALIZED VIEW public.database_agg_transcript AS
 
 
 --
+-- Name: database_dist; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.database_dist AS
+ SELECT database_agg.database,
+    public.agg_mean_std_count(jsonb_agg(database_agg."values")) AS dist
+   FROM public.database_agg
+  GROUP BY database_agg.database
+  WITH NO DATA;
+
+
+--
+-- Name: depmap_cell_line_mapping; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.depmap_cell_line_mapping (
+    cell_line character varying,
+    depmap_id character varying
+);
+
+
+--
 -- Name: gene_info; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -665,6 +824,17 @@ CREATE VIEW public.mapper AS
 
 CREATE TABLE public.schema_migrations (
     version character varying(255) NOT NULL
+);
+
+
+--
+-- Name: unified_term_map; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unified_term_map (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    original_term character varying,
+    term character varying
 );
 
 
@@ -763,6 +933,21 @@ ALTER TABLE ONLY public.transcript
 
 
 --
+-- Name: unified_term_map unified_term_map_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.unified_term_map
+    ADD CONSTRAINT unified_term_map_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ccle_transcriptomics_data_gene_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ccle_transcriptomics_data_gene_idx ON public.ccle_transcriptomics_data USING btree (gene);
+
+
+--
 -- Name: data_database_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -805,6 +990,13 @@ CREATE UNIQUE INDEX database_agg_trancript_id_idx ON public.database_agg_transcr
 
 
 --
+-- Name: depmap_cell_line_mapping_cell_line_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX depmap_cell_line_mapping_cell_line_idx ON public.depmap_cell_line_mapping USING btree (cell_line);
+
+
+--
 -- Name: gene_gene_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -823,6 +1015,13 @@ CREATE INDEX gene_gene_trgm_idx ON public.gene USING gin (gene public.gin_trgm_o
 --
 
 CREATE INDEX gene_info_symbol_idx ON public.gene_info USING btree (symbol);
+
+
+--
+-- Name: unified_term_map_original_term_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX unified_term_map_original_term_idx ON public.unified_term_map USING btree (original_term);
 
 
 --
@@ -891,4 +1090,10 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20230223214101'),
     ('20230313174842'),
     ('20230403155038'),
-    ('20230406190001');
+    ('20230406190001'),
+    ('20230419203711'),
+    ('20230419204219'),
+    ('20230727174158'),
+    ('20240417143956'),
+    ('20240418212539'),
+    ('20240419161005');

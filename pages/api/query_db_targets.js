@@ -16,8 +16,11 @@ export default async function handler(req, res) {
         const input = req.body;
 
         const input_data = input['inputData']
-
         const bg = input['bg']
+        const cellLineTarget = input['cellLineTarget']
+        const cellLineName = input['cellLineName']
+
+        console.log(cellLineName, cellLineTarget)
 
         var result = [];
 
@@ -41,8 +44,31 @@ export default async function handler(req, res) {
                 ) select gene, t, p, adj_p, log2fc from cte
                 where index < 100 or p < 0.05;
             `
+        var cellLineRes = null;
+        const dbName = 'CCLE_transcriptomics'
+        if (cellLineTarget) {
+            cellLineRes = await prisma.$queryRaw `
+                select 
+                    s.*, 
+                    d.depmap_id
+                from 
+                    screen_cell_lines_vectorized(${input_data}::jsonb, ${dbName}, ${cellLineName}) as s
+                left join 
+                    depmap_cell_line_mapping as d
+                on 
+                split_part(s.cell_line, ' - ', 2) = d.cell_line;
+            `
+            console.log(cellLineName)
+            if (cellLineName != 'All') {
+                cellLineRes = cellLineRes.filter(x => x.cell_line.split(' - ')[0] === cellLineName).slice(0, 20)
+            } else {
+                cellLineRes = cellLineRes.slice(0, 20)
+            }
+        }
 
-        res.status(200).json(result);
+        console.log(cellLineRes)
+
+        res.status(200).json({result, cellLineRes});
     }
 }
 

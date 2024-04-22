@@ -15,6 +15,9 @@ export default function TargetResultTable(props) {
   const runtimeConfig = useRuntimeConfig();
 
   var results = JSON.parse(props.results);
+  if ('result' in results) {
+    results = results['result']
+  }
   const filt = props.filt;
   const setFilt = props.setFilt;
   const setGene = props.setgene;

@@ -14,6 +14,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useRouter } from 'next/router';
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import { useCallback } from 'react';
+import CellLineTable from '../components/cellLineTable';
 
 
 // Setup possible filters
@@ -34,6 +35,7 @@ export default function Results() {
   var initMembraneVal;
   var initSecretedVal;
   var results;
+  var cell_line_res;
   var transcript_level;
   var initGene = '';
   var initTranscript = '';
@@ -43,7 +45,10 @@ export default function Results() {
     initSecretedVal = JSON.parse(router.query['secretedGenes']);
     transcript_level = JSON.parse(router.query['transcript_level']);
     
-    results = JSON.parse(string_res);
+    const res = JSON.parse(string_res);
+    results = res['result']
+    cell_line_res = res['cellLineRes']
+    console.log(results)
     initGene = results[0].gene
     if (transcript_level) initTranscript = results[0].transcript
   } catch {
@@ -55,7 +60,7 @@ export default function Results() {
   const [membraneGenes, setMembraneGenes] = React.useState(initMembraneVal);
   // Set state of membrane gene filter based on submission page
   const [secretedGenes, setSecretedGenes] = React.useState(initSecretedVal);
-
+  console.log(cell_line_res)
   var initFilt;
   if (membraneGenes) {
     initFilt = filtMembranes
@@ -156,7 +161,7 @@ export default function Results() {
             <h2>TargetRanger Results</h2>
             <p>The TargetRanger pipeline compares the RNA-seq expression data you uploaded to basal expression data from normal tissues and cell types to identifies genes that are highly-expressed in the input compared to the normal baseline using Welch&apos;s T-test. You can filter the ranked candidates by membrane or secretome only.</p>
           </div>
-
+          <CellLineTable results={cell_line_res} />
           <div className={styles.horizontalFlexbox}>
             <div style={{ width: '250px' }}>Prioritize membrane genes:</div>
             <ToggleButtonGroup
@@ -179,6 +184,7 @@ export default function Results() {
               <ToggleButton value={false}>NO</ToggleButton>
             </ToggleButtonGroup>
           </div>
+          
           <TargetResultTable results={string_res} membraneGenes={membraneGenes} filt={filt} setFilt={setFilt} setgene={setGene} settranscript={setTranscript} transcript_level={transcript_level} fname={fname}/>
           <div className={styles.textDiv}>
             <p>View a box plot for each identified target in the table by clicking on the table row, or by selecting the gene from the dropdown box below:</p>

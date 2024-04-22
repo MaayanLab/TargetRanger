@@ -4,3 +4,7 @@ numpy
 pandas
 psycopg2
 tqdm
+statsmodels
+matplotlib
+scipy
+git+https://github.com/Maayanlab/maayanlab-bioinformatics.git

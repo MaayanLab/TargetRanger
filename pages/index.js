@@ -36,6 +36,7 @@ import { Alert } from '@mui/material';
 import { Drawer, Link } from '@mui/material';
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import { IconButton, LinearProgress } from '@mui/material';
+import prisma from '../prisma/prisma';
 
 
 const databases = new Map([
@@ -46,9 +47,28 @@ const databases = new Map([
     [4, 'GTEx_transcript'],
 ]);
 
+export async function getServerSideProps() {
 
 
-export default function Page() {
+    let ccle_data = await prisma.$queryRaw
+        `
+        select d.values as df
+        from data_complete d
+        where d.dbname = 'CCLE_transcriptomics'
+        limit 1;
+    `
+    const ccle_names = [... new Set(Object.keys(ccle_data[0].df.value).map(item => item.split(' - ')[0]))]
+
+    return {
+        props: {
+            ccle_names
+        }
+    }
+}
+
+
+
+export default function Page(props) {
     const runtimeConfig = useRuntimeConfig()
 
     // For MUI loading icon
@@ -63,6 +83,8 @@ export default function Page() {
 
     const [membraneGenes, setMembraneGenes] = React.useState(true);
     const [secretedGenes, setSecretedGenes] = React.useState(false);
+    const [cellLineTarget, setCellLineTarget] = React.useState(true);
+    const [cellLineName, setCellLineName] = React.useState('All');
 
     const [precomputedBackground, setPrecomputedBackground] = React.useState(0);
 
@@ -79,8 +101,8 @@ export default function Page() {
     const submitGeneStats = useCallback(async (fileStats, geneCounts) => {
 
         const bg = databases.get(precomputedBackground)
-
-        var inputData = { 'inputData': fileStats, 'bg': bg }
+        console.log(cellLineName)
+        var inputData = { 'inputData': fileStats, 'bg': bg, 'cellLineTarget': cellLineTarget, 'cellLineName': cellLineName}
         var res;
         res = await fetch(`${runtimeConfig.NEXT_PUBLIC_ENTRYPOINT || ''}/api/${ level ? 'query_db_targets' : 'query_db_targets_transcript'}`, {
             method: 'POST',
@@ -90,7 +112,10 @@ export default function Page() {
             body: JSON.stringify(inputData)
         })
        
-        let json = await res.json();
+        let jsonres = await res.json();
+        console.log(jsonres)
+
+        let json = jsonres.result;
         
         var targets = [];
         var included = [];
@@ -109,13 +134,15 @@ export default function Page() {
         let href = {
             pathname: "/targetscreenerresults",
             query: {
-                res: JSON.stringify(json),
+                res: JSON.stringify(jsonres),
                 ogfile: JSON.stringify(targetStats),
                 membraneGenes: membraneGenes,
                 secretedGenes: secretedGenes,
                 fileName: fileName,
                 precomputedBackground: bg,
                 transcript_level: !level,
+                cellLineTarget: cellLineTarget,
+                cellLineName: cellLineName
             }
         };
         router.push(href, '/targetscreenerresults').then(() => {
@@ -124,7 +151,7 @@ export default function Page() {
             setLoading(false)
             alert('Error with returned data')
         })
-    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName, level])
+    }, [runtimeConfig, precomputedBackground, membraneGenes, secretedGenes, alert, router, fileName, level, cellLineName, cellLineTarget])
 
 
     const fetchDataset = useCallback((endpoint) => { 
@@ -257,7 +284,7 @@ export default function Page() {
                         <Card >
                             <CardContent>
                                 <div style={{ flexWrap: 'wrap', gap: '50px' }} className={styles.horizontalFlexbox}>
-
+                                    
                                     <div className={styles.verticalFlexbox}>
 
                                         <div className={styles.horizontalFlexbox}>
@@ -353,15 +380,41 @@ export default function Page() {
                                                         </TableContainer>
                                                     </Popover>
                                                 </div>
-
-
-
-
                                             </div>
                                         </div>
 
+                                        <div>Prioritize Cell Line Targets:</div>
+                                            <ToggleButtonGroup
+                                                color="secondary"
+                                                value={cellLineTarget}
+                                                exclusive
+                                                onChange={(event, newValue) => { if (newValue !== null) setCellLineTarget(newValue) }}
+                                            >
+                                                <ToggleButton value={true}>Yes</ToggleButton>
+                                                <ToggleButton value={false}>No</ToggleButton>
+                                            </ToggleButtonGroup>
 
-
+                                            {cellLineTarget & level ? <Box sx={{ width: 300 }}>
+                                                        <FormControl fullWidth>
+                                                            <Select
+                                                                color="secondary"
+                                                                value={cellLineName}
+                                                                onChange={(event) =>  {
+                                                                    console.log(event.target.value)
+                                                                    setCellLineName(event.target.value)
+                                                                }
+                                                                    
+                                                                }
+                                                            >
+                                                                <MenuItem color="secondary" value={'All'}>All</MenuItem>
+                                                                {props.ccle_names.map((item, index) => {
+                                                                    if (item != 'Unknown') {
+                                                                        return <MenuItem key={index} color="secondary" value={item}>{item}</MenuItem>
+                                                                    }
+                                                                })}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Box> : <></>}
 
                                     </div>
 
