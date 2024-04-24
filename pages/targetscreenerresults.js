@@ -14,6 +14,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useRouter } from 'next/router';
 import { useRuntimeConfig } from '../components/runtimeConfig';
 import { useCallback } from 'react';
+import membrane_protiens from "../public/files/membrane_protiens.json";
 
 
 // Setup possible filters
@@ -77,14 +78,20 @@ export default function Results() {
   if (!results) {
     targetList = ['']
   } else {
-    targetList = results.map(x => x.gene)
+    targetList = results.filter(x => x.t > 0).map(x => x.gene)
     if (transcript_level) {
       targetList = results.map(x => x.transcript)
       results.map(x => targetMap[x.transcript] = x.gene)
       transcriptFirst = targetList[0]
       geneFirst = targetMap[transcriptFirst]
     } else {
+      console.log(results)
+      console.log(targetList)
       geneFirst = targetList[0]
+      if (membraneGenes) {
+        const membraneTargetList = targetList.filter(x => membrane_protiens.includes(x))
+        geneFirst = membraneTargetList[0]
+      }
     }
   } 
 
