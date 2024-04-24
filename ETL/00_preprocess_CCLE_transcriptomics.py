@@ -107,6 +107,24 @@ for cl in tqdm(list(df_expr.columns)):
 import json
 with open('all_cell_line_targets.json', 'w') as f:
   json.dump(cell_line_targets, f)
+
 # %%
-cell_line_targets
+from scipy.stats import zscore
+
+df_z_log2 = zscore(df, axis=0)
+# %%
+ts = []
+cell_line_targets = {}
+for cl in tqdm(list(df_z_log2.columns)):
+  targets = df_z_log2[cl][df_z_log2[cl] > 2.23].index.values
+  targets = [t[0] for t in targets]
+  cell_line_targets[cl] = targets
+  ts.append(len(targets))
+
+print(np.mean(ts), np.std(ts))
+
+# %%
+import json
+with open('cell_line_targets_zscored.json', 'w') as f:
+  json.dump(cell_line_targets, f)
 # %%

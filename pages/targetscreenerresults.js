@@ -94,6 +94,7 @@ export default function Results() {
   } 
 
   const [gene, setGene] = useState(geneFirst)
+  const [filterCellLine, setFilterCellLine] = useState('')
   const [transcript, setTranscript] = useState(transcriptFirst)
   const [transcriptExpression, setTranscriptExpression] = useState(transcript_level)
 
@@ -179,6 +180,16 @@ export default function Results() {
               value={secretedGenes}
               exclusive
               onChange={(event, newValue) => {if (newValue !== null) setSecretedGenes(newValue); if (newValue) setMembraneGenes(false)}}
+            >
+              <ToggleButton value={true}>YES</ToggleButton>
+              <ToggleButton value={false}>NO</ToggleButton>
+            </ToggleButtonGroup>
+            <div style={{ width: '250px' }}>Prioritize selected cell line targets:</div>
+            <ToggleButtonGroup
+              color="secondary"
+              value={secretedGenes}
+              exclusive
+              onChange={(event, newValue) => {if (newValue !== null) setFilterCellLine(newValue)}}
             >
               <ToggleButton value={true}>YES</ToggleButton>
               <ToggleButton value={false}>NO</ToggleButton>
