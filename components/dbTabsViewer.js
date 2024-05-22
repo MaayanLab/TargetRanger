@@ -7,15 +7,9 @@ import GraphMissing from './graphMissing';
 import styles from '../styles/Main.module.css';
 import PropTypes from 'prop-types';
 import { Container} from '@mui/material';
-import dynamic from 'next/dynamic';
 import { useRuntimeConfig } from "./runtimeConfig";
 import PlotOrientation from "./plotOrientation";
 import { useState } from "react";
-
-
-const Plot = dynamic(() => import('react-plotly.js'), {
-	ssr: false,
-});
 
 
 export default function DbTabsViewer(props) {
@@ -34,6 +28,10 @@ export default function DbTabsViewer(props) {
         values: geneStats[gene],
         name: 'input vector',
         boxmean: 'sd',
+    }
+
+    if (props.database == 0) {
+        gene_data.values =  gene_data.values.map(x => Math.log2(x + 1))
     }
 
     function TabPanel(props) {
@@ -158,8 +156,8 @@ export default function DbTabsViewer(props) {
     let ccle_proteomics_title = props.gene + ' Protein Expression across CCLE Cell Lines';
 
     return (
-    <div style={{ width: '80%' }}>
-        <Box sx={{ width: '100%' }}>
+    <div>
+        <Box sx={{ width: '50%' }}>
             <Box className={styles.tabsBox}>
                 <Tabs value={database} onChange={(event, newValue) => { setDatabase(newValue) }} aria-label="basic tabs example" variant="fullWidth" scrollButtons={true} centered>
                     {
@@ -234,7 +232,7 @@ export default function DbTabsViewer(props) {
                         <GraphMissing />
                 }
             </TabPanel>
-            <TabPanel style={{ width: '100%' }} value={database} index={1}>
+            <TabPanel value={database} index={1}>
                 {
                     gtex_transcriptomics != null
                         ?

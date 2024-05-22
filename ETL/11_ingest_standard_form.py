@@ -140,7 +140,10 @@ def load_standard(con, df, name, migration=None):
 @click.option('-m', '--migration', type=bool, is_flag=True, default=False, help='write migration to a output file')
 def ingest(input, name, output, migration):
   con = psycopg2.connect(os.environ['DATABASE_URL'])
-  df = pd.read_csv(input, sep='\t', index_col=[0, 1])
+  if '.gz' in input.name:
+    df = pd.read_csv(input.name, sep='\t', index_col=[0, 1], compression='gzip')
+  else:
+    df = pd.read_csv(input, sep='\t', index_col=[0, 1])
   with open(output, 'w') as fw:
     database_id = load_standard(con, df, name, migration=fw if migration else None)
     if not migration: fw.write(database_id)

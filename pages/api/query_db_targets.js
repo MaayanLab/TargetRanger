@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
         var result = [];
 
-        
+        console.log(bg)
         result = await prisma.$queryRaw
             `
                 with cte as (

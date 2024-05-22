@@ -185,7 +185,7 @@ ingest/ARCHS4_transcript: input/archs4-transcript-stats-clean.tsv.gz
 	mkdir -p ingest
 	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@
 
-ingest/ARCHS4.sql: input/archs4-gene-stats-clean.tsv
+ingest/ARCHS4.sql: input/archs4-gene-stats-norm-clean.tsv.gz
 	make PYTHON=$(PYTHON) ensure-db
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n ARCHS4 -i $< -o $@ -m
