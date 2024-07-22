@@ -71,40 +71,40 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
                 
                 <Tooltip title="Open in Ensembl">
                 <a className={styles.geneLink} href={ARCHS4_link} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "60px"}} src={"images/archs4.png"} />
+                    <img style={{width: "60px"}} alt="Ensembl" src={"images/archs4.png"} />
                 </a>
                 </Tooltip>
                 {transcript ?  <Tooltip title="Open in ARCHS4"><a className={styles.geneLink} href={Ensembl_link} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "20px"}} src={"images/ensembl.png"} />
+                    <img style={{width: "20px"}} alt="ARCHS4" src={"images/ensembl.png"} />
                 </a></Tooltip>: <></>}
                 <Tooltip title="Open in Harmonizome">
                 <a className={styles.geneLink} href={Harmonizome} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "25px"}} src={"images/harmonizomelogo.png"} />
+                    <img style={{width: "25px"}} alt="Harmonizome" src={"images/harmonizomelogo.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in Entrez Gene">
                 <a className={styles.geneLink} href={NCBI_entrez} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "22px"}} src={"images/Entrez.png"} />
+                    <img style={{width: "22px"}} alt="Entrez" src={"images/Entrez.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in GDLPA (Gene and Drug Landing Page Aggregator)">
                 <a className={styles.geneLink} href={GDLPA} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "20px"}} src={"images/gdlpa.png"} />
+                    <img style={{width: "20px"}} alt="GDLPA" src={"images/gdlpa.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in Antibodypedia">
                 <a className={styles.geneLink} href={Antibodypedia} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "20px"}} src={"images/antibodypedia.png"} />
+                    <img style={{width: "20px"}} alt="Antibodypedia" src={"images/antibodypedia.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in GeneCards">
                 <a className={styles.geneLink} href={GeneCards} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "60px"}} src={"images/genecards.png"} />
+                    <img style={{width: "60px"}} alt="GeneCards" src={"images/genecards.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in OpenTargets">
                 <a className={styles.geneLink} href={OpenTargets} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "80px"}} src={"images/opentargets.png"} />
+                    <img style={{width: "80px"}} alt="OpenTargets" src={"images/opentargets.png"} />
                 </a>
                 </Tooltip>
             </div>
