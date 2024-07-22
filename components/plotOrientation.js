@@ -16,7 +16,7 @@ export default function PlotOrientation({ data, labels_x, labels_y, title, text,
         data_reverse['marker'] = {color: '#1f77b4'}
         data_reverse["mode"]= 'markers'
     }
-    
+
     val_names.forEach((attr) => {
         if (attr in data) {
             data_reverse[attr] = data[attr].slice().reverse();
@@ -51,14 +51,11 @@ export default function PlotOrientation({ data, labels_x, labels_y, title, text,
             })
         }
     }
-
     
-
-    console.log(data_traces_reverse)
     return (<>
     {horizontal ? 
     <>
-        <div style={{ height: '750px', overflowX: 'scroll'}}>
+        <div style={{ height: '750px', width: "100%", overflowX: 'scroll'}}>
         <Plot
             data={data_traces_reverse}
             layout={{

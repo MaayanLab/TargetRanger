@@ -119,8 +119,8 @@ export default function DbTabsViewer(props) {
                     archs4_transcript != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} transcript={transcript} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} transcript={transcript} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={archs4_transcript} labels_x={archs4_transcript_names_x} labels_y={archs4_transcript_names_y} title={archs4_title} text={'RNA Counts'} horizontal={horizontal} genedata={transcript_data}/>
                         </>
 
@@ -133,8 +133,8 @@ export default function DbTabsViewer(props) {
                     gtex_transcript != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} transcript={transcript} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.transcript}</h1> */}
+                            {/* <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} transcript={transcript} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcript} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={gtex_transcript} labels_x={gtex_transcript_names_x} labels_y={gtex_transcript_names_y} title={gtex_transcriptomics_title} text={'RNA Counts'} horizontal={horizontal} genedata={transcript_data}/>
                         </>
                         :

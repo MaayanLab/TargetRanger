@@ -1,13 +1,16 @@
 .geneLink {
     color: #606060;
     text-decoration: none;
-    background-color: #e3e1ff;
+    background-color: #ffffff00;
+    border: 1px solid #606060;
     border-radius: 12px;
-    padding: 7px;
+    padding: 10px;
+    padding-bottom: 5px;
 }
 
 .geneLink:hover {
-    color: black;
+    background-color: rgb(242, 242, 242);
+    transition: all 0.3s ease;
 }
 
 .download {

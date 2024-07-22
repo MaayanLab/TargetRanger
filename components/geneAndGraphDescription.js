@@ -1,5 +1,6 @@
-import { Button, Menu, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Button, Menu, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import * as React from 'react';
+import runtimeConfig from './runtimeConfig';
 import styles from '../styles/GeneDescription.module.css';
 
 
@@ -32,6 +33,9 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
     let Harmonizome = 'https://maayanlab.cloud/Harmonizome/gene/' + gene;
     let ARCHS4_link = 'https://maayanlab.cloud/archs4/gene/' + gene;
     let GDLPA = 'https://cfde-gene-pages.cloud/gene/' + gene + '?CF=false&PS=true&Ag=true&gene=false&variant=false';
+    let Antibodypedia =  `https://www.antibodypedia.com/explore/${gene}`
+    let OpenTargets = `https://platform.opentargets.org/search?q=${gene}&page=1&entities=target`
+    
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -39,7 +43,7 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
         setAnchorEl(event.currentTarget);
         
     };
-    var dbname = database.props.children;
+    var dbname = database
 
     const formatCSV = () => {
         const csvData = createCSV(gene, data, dbname)
@@ -58,69 +62,54 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
     };
 
     return (
-        <>
-            {/* {
-                NCBI_data == 'No gene description available.'
-                    ?
-                        <div style={{textAlign: 'center'}}>{NCBI_data}</div>
-                    :
-                        <> */}
-            <div><b>Short description (from <a href={NCBI_entrez} target="_blank" rel="noopener noreferrer">NCBI&apos;s Gene Database</a>):</b> {NCBI_data}</div>
+        <div style={{margin: "15px"}}>
+            <div style={{ fontSize: "16px", textAlign: "justify"}}><p><b style={{fontWeight: "2000"}}>{gene}</b> short description (from <a href={NCBI_entrez} target="_blank" rel="noopener noreferrer">NCBI&apos;s Gene Database</a>):</p> {NCBI_data}</div>
             <br />
             <div><b>Gene pages on other sites:</b></div>
             <br />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '25px' }}>
-                {transcript ? <a className={styles.geneLink} href={Ensembl_link} target="_blank" rel="noopener noreferrer">Ensembl</a>: <></>}
-                <a className={styles.geneLink} href={ARCHS4_link} target="_blank" rel="noopener noreferrer">ARCHS4</a>
-                <a className={styles.geneLink} href={Harmonizome} target="_blank" rel="noopener noreferrer">Harmonizome</a>
-                <a className={styles.geneLink} href={NCBI_entrez} target="_blank" rel="noopener noreferrer">Entrez Gene</a>
-                <a className={styles.geneLink} href={GeneCards} target="_blank" rel="noopener noreferrer">GeneCards</a>
-                <a className={styles.geneLink} href={GDLPA} target="_blank" rel="noopener noreferrer">GDLPA</a>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '25px', marginRight: "auto", marginLeft: "auto", justifyContent: "center" }}>
+                
+                <Tooltip title="Open in Ensembl">
+                <a className={styles.geneLink} href={ARCHS4_link} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "60px"}} src={"images/archs4.png"} />
+                </a>
+                </Tooltip>
+                {transcript ?  <Tooltip title="Open in ARCHS4"><a className={styles.geneLink} href={Ensembl_link} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "20px"}} src={"images/ensembl.png"} />
+                </a></Tooltip>: <></>}
+                <Tooltip title="Open in Harmonizome">
+                <a className={styles.geneLink} href={Harmonizome} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "25px"}} src={"images/harmonizomelogo.png"} />
+                </a>
+                </Tooltip>
+                <Tooltip title="Open in Entrez Gene">
+                <a className={styles.geneLink} href={NCBI_entrez} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "22px"}} src={"images/Entrez.png"} />
+                </a>
+                </Tooltip>
+                <Tooltip title="Open in GDLPA (Gene and Drug Landing Page Aggregator)">
+                <a className={styles.geneLink} href={GDLPA} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "20px"}} src={"images/gdlpa.png"} />
+                </a>
+                </Tooltip>
+                <Tooltip title="Open in Antibodypedia">
+                <a className={styles.geneLink} href={Antibodypedia} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "20px"}} src={"images/antibodypedia.png"} />
+                </a>
+                </Tooltip>
+                <Tooltip title="Open in GeneCards">
+                <a className={styles.geneLink} href={GeneCards} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "60px"}} src={"images/genecards.png"} />
+                </a>
+                </Tooltip>
+                <Tooltip title="Open in OpenTargets">
+                <a className={styles.geneLink} href={OpenTargets} target="_blank" rel="noopener noreferrer">
+                    <img style={{width: "80px"}} src={"images/opentargets.png"} />
+                </a>
+                </Tooltip>
             </div>
             <br />
-            <div><b>{database}:</b> {database_desc}</div>
-            <div style={{ display: 'flex', margin: '1%', textAlign: 'right', justifyContent: 'end' }}>
-                <div >
-                    <ToggleButtonGroup
-                        color="secondary"
-                        value={horizontal}
-                        exclusive
-                        sx={{ marginBottom: '10px' }}
-                        onChange={(event, newValue) => {
-                            if (newValue !== null)
-                                setHorizontal(newValue);
-                        }
-                        }
-                    >
-                        <ToggleButton value={false}>Vertical</ToggleButton>
-                        <ToggleButton value={true}>Horizontal</ToggleButton>
-                    </ToggleButtonGroup>
-                </div>
-                <div className={styles.download}>
-                    <Button
-                        id="basic-button"
-                        aria-controls={open ? 'basic-menu' : undefined}
-                        aria-haspopup="true"
-                        aria-expanded={open ? 'true' : undefined}
-                        onClick={handleClick}
-                    >
-                        Download plot data
-                    </Button>
-                    <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                        MenuListProps={{
-                            'aria-labelledby': 'basic-button',
-                        }}
-                    >
-                        <Button download={gene + '-' + database.props.children + '.csv'} onClick={formatCSV}>CSV</Button>
-                        <Button href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`} download={gene + '-' + database.props.children + '.json'} onClick={handleClose}>JSON</Button>
-                    </Menu>
-                </div>
-            </div>
-        </>
+        </div>
     );
 }
 

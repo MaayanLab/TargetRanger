@@ -30,9 +30,9 @@ export default function DbTabsViewer(props) {
         boxmean: 'sd',
     }
 
-    if (props.database == 0) {
+    /* if (props.database == 0) {
         gene_data.values =  gene_data.values.map(x => Math.log2(x + 1))
-    }
+    } */
 
     function TabPanel(props) {
         const {children, value, index, classes, ...other} = props;
@@ -157,9 +157,9 @@ export default function DbTabsViewer(props) {
 
     return (
     <div>
-        <Box sx={{ width: '50%' }}>
+        <Box sx={{ margin: "1.25rem" }}>
             <Box className={styles.tabsBox}>
-                <Tabs value={database} onChange={(event, newValue) => { setDatabase(newValue) }} aria-label="basic tabs example" variant="fullWidth" scrollButtons={true} centered>
+                <Tabs value={database} onChange={(event, newValue) => { setDatabase(newValue) }} aria-label="basic tabs example" variant="scrollable" scrollButtons={'auto'} centered>
                     {
                         (database == 0)
                             ?
@@ -223,8 +223,8 @@ export default function DbTabsViewer(props) {
                     archs4 != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                           {/*  <h1 style={{ textAlign: 'center' }}>{props.gene}</h1> */}
+                            {/* <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={ARCHS4_link} database_desc={ARCHS4_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={archs4} labels_x={archs4_names_x} labels_y={archs4_names_y} title={archs4_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
@@ -237,8 +237,8 @@ export default function DbTabsViewer(props) {
                     gtex_transcriptomics != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_transcriptomics_link} database_desc={GTEx_transcriptomics_desc_d} data={gtex_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={gtex_transcriptomics} labels_x={gtex_transcriptomics_names_x} labels_y={gtex_transcriptomics_names_y} title={gtex_transcriptomics_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
@@ -251,8 +251,8 @@ export default function DbTabsViewer(props) {
                     tabula_sapiens != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={Tabula_Sapiens_link} database_desc={Tabula_Sapiens_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={Tabula_Sapiens_link} database_desc={Tabula_Sapiens_desc_d} data={archs4} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={tabula_sapiens} labels_x={ts_names_x} labels_y={ts_names_y} title={tabula_sapiens_title} text={'RNA Counts'} horizontal={horizontal} genedata={gene_data} transcript_level={transcript_level}/>
                         </>
 
@@ -265,8 +265,8 @@ export default function DbTabsViewer(props) {
                     ccle_transcriptomics != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_transcriptomics_link} database_desc={CCLE_transcriptomics_desc_d} data={ccle_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_transcriptomics_link} database_desc={CCLE_transcriptomics_desc_d} data={ccle_transcriptomics} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={ccle_transcriptomics} labels_x={ccle_transcriptomics_names_x} labels_y={ccle_transcriptomics_names_y} title={ccle_transcriptomics_title} text={'TPM'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
@@ -278,8 +278,8 @@ export default function DbTabsViewer(props) {
                     hpm != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPM_link} database_desc={HPM_desc_d} data={hpm} horizontal={horizontal} setHorizontal={setHorizontal} />
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1> */}
+                            {/* <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPM_link} database_desc={HPM_desc_d} data={hpm} horizontal={horizontal} setHorizontal={setHorizontal} /> */}
                             <PlotOrientation data={hpm} labels_x={hpm_names_x} labels_y={hpm_names_y} title={hpm_title} text={'Average Spectral Counts'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
@@ -291,8 +291,8 @@ export default function DbTabsViewer(props) {
                     hpa != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPA_link} database_desc={HPA_desc_d} data={hpa} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1> */}
+                            {/* <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={HPA_link} database_desc={HPA_desc_d} data={hpa} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={hpa} labels_x={hpa_names_x} labels_y={hpa_names_y} title={hpa_title} text={'Tissue Expression Level'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
@@ -304,8 +304,8 @@ export default function DbTabsViewer(props) {
                     gtex_proteomics != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_proteomics_link} database_desc={GTEx_proteomics_desc_d} data={gtex_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
+                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={GTEx_proteomics_link} database_desc={GTEx_proteomics_desc_d} data={gtex_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={gtex_proteomics} labels_x={gtex_proteomics_names_x} labels_y={gtex_proteomics_names_y} title={gtex_proteomics_title} text={'log2(relative abundance)'} horizontal={horizontal} transcript_level={transcript_level}/>
                         </>
                         :
@@ -317,8 +317,8 @@ export default function DbTabsViewer(props) {
                     ccle_proteomics != null
                         ?
                         <>
-                            <h1 style={{ textAlign: 'center' }}>{props.gene}</h1>
-                            <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_proteomics_link} database_desc={CCLE_proteomics_desc_d} data={ccle_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/>
+                            {/* <h1 style={{ textAlign: 'center' }}>{props.gene}</h1> */}
+                            {/* <GeneAndGraphDescription NCBI_data={result.NCBI_data} gene={props.gene} database={CCLE_proteomics_link} database_desc={CCLE_proteomics_desc_d} data={ccle_proteomics} horizontal={horizontal} setHorizontal={setHorizontal}/> */}
                             <PlotOrientation data={ccle_proteomics} labels_x={ccle_prot_names_x} labels_y={ccle_prot_names_y} title={ccle_proteomics_title} text={'Normalized Protein Quantity'}  horizontal={horizontal}></PlotOrientation>
                         </>
                         :

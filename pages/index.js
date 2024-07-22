@@ -549,7 +549,7 @@ export default function Page() {
                         <ToggleButton value={true}>Yes</ToggleButton>
                         <ToggleButton value={false}>No</ToggleButton>
                       </ToggleButtonGroup>
-                      <div>Prioritize membrane genes</div>
+                      <div style={{marginTop: "10px", marginLeft: "10px"}}>Prioritize membrane genes</div>
                     </div>
                     <div
                       className={styles.horizontalFlexbox}
@@ -567,7 +567,7 @@ export default function Page() {
                         <ToggleButton value={true}>Yes</ToggleButton>
                         <ToggleButton value={false}>No</ToggleButton>
                       </ToggleButtonGroup>
-                      <div>Prioritize secreted genes</div>
+                      <div style={{marginTop: "10px", marginLeft: "10px"}}>Prioritize secreted genes</div>
                     </div>
                   </div>
                 </div>
@@ -575,7 +575,8 @@ export default function Page() {
               <CardActions style={{ justifyContent: "center" }}>
                 <div className={styles.horizontalFlexbox}>
                   <Button
-                    sx={{fontSize: "1em", paddingX: '30px'}}
+                    sx={{fontSize: "1em", paddingX: '30px', marginRight: '5px'
+                    }}
                     variant="contained"
                     color="secondary"
                     onClick={submitFile}

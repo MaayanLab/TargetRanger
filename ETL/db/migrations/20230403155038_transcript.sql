@@ -33,9 +33,6 @@ LEFT JOIN data_transcript ON data_transcript.database = database.id
 LEFT JOIN transcript ON data_transcript.transcript = transcript.id;
 
 
-
-
-
 CREATE TABLE gene_transcript (
     gene uuid NOT NULL REFERENCES gene (id) ON DELETE CASCADE,
     transcript uuid NOT NULL REFERENCES transcript (id) ON DELETE CASCADE,
