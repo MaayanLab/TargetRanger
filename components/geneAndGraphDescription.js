@@ -89,7 +89,7 @@ function GeneAndGraphDescription({ NCBI_data, transcript, gene, database, databa
                 </Tooltip>
                 <Tooltip title="Open in GDLPA (Gene and Drug Landing Page Aggregator)">
                 <a className={styles.geneLink} href={GDLPA} target="_blank" rel="noopener noreferrer">
-                    <img style={{width: "20px"}} alt="GDLPA" src={"images/gdlpa.png"} />
+                    <img style={{width: "20px"}} alt="GDLPA" src={"images/GDLPA.png"} />
                 </a>
                 </Tooltip>
                 <Tooltip title="Open in Antibodypedia">
