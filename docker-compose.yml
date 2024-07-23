@@ -3,7 +3,7 @@ services:
   app:
     platform: linux/x86_64
     build: .
-    image: maayanlab/targetranger:0.4.11
+    image: maayanlab/targetranger:0.4.12
     environment:
       - POSTGRES_HOST=localhost
       - POSTGRES_DB=postgres
