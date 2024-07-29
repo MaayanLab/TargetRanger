@@ -255,7 +255,7 @@ export default function Results() {
                   onChange={(event, newValue) => {
                     if (newValue != null) {
                       setTranscriptExpression(newValue);
-                      if (database > 2) {
+                      if (database ==  3 || database == 4) {
                         setDatabase(0);
                       }
                     }

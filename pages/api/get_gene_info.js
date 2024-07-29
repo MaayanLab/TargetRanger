@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         for (let i in all_db_data) {
             let db = all_db_data[i].dbname;
             let df = all_db_data[i].df;
-            if (db == 'GTEx_transcriptomics' || db == 'ARCHS4' || db == 'Tabula_Sapiens' || db == 'GTEx_proteomics') {
+            if (db == 'GTEx_transcriptomics' || db == 'HuBMAP' || db == 'ARCHS4' || db == 'Tabula_Sapiens' || db == 'GTEx_proteomics') {
                 const descriptions = Object.keys(df.mean);
                 descriptions.sort((a, b) => df.mean[a] - df.mean[b]);
                 let names = descriptions;
