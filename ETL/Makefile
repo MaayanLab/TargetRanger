@@ -200,6 +200,11 @@ ingest/Tabula_Sapiens.sql: input/ts_10x_cell-ontology-class_donors_tissue-labels
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n Tabula_Sapiens -i $< -o $@ -m
 
+ingest/HuBMAP.sql: input/hubmap_reference_matrix_v1.tsv
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 11_ingest_standard_form.py -n HuBMAP -i $< -o $@ -m
+
 ingest/HPM.sql: preprocessed/hpm.tsv
 	make PYTHON=$(PYTHON) ensure-db
 	mkdir -p ingest
