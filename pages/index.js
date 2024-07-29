@@ -43,6 +43,7 @@ const databases = new Map([
   [2, "Tabula_Sapiens"],
   [3, "ARCHS4_transcript"],
   [4, "GTEx_transcript"],
+  [5, "HuBMAP"]
 ]);
 
 export default function Page() {
@@ -507,6 +508,9 @@ export default function Page() {
                                 </MenuItem>
                                 <MenuItem color="secondary" value={2}>
                                   Tabula Sapiens (scRNA-seq) - Gene
+                                </MenuItem>
+                                <MenuItem color="secondary" value={5}>
+                                  HuBMAP (scRNA-seq) - Gene
                                 </MenuItem>
                               </Select>
                             </FormControl>
