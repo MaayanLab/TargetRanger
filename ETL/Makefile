@@ -185,10 +185,15 @@ ingest/ARCHS4_transcript: input/archs4-transcript-stats-clean.tsv.gz
 	mkdir -p ingest
 	$(PYTHON) 12_ingest_standard_form_transcript.py -n ARCHS4_transcript -i $< -o $@
 
-ingest/ARCHS4.sql: input/archs4-gene-stats-norm-clean.tsv.gz
+ingest/ARCHS4.sql: input/archs4-gene-stats-clean.tsv.gz
 	make PYTHON=$(PYTHON) ensure-db
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n ARCHS4 -i $< -o $@ -m
+
+ingest/ARCHS4_norm.sql: input/archs4-gene-stats-norm-clean.tsv.gz
+	make PYTHON=$(PYTHON) ensure-db
+	mkdir -p ingest
+	$(PYTHON) 11_ingest_standard_form.py -n ARCHS4_norm -i $< -o $@ -m
 
 ingest/GTEx_transcriptomics.sql: input/gtex-gene-stats.tsv
 	make PYTHON=$(PYTHON) ensure-db
@@ -200,7 +205,7 @@ ingest/Tabula_Sapiens.sql: input/ts_10x_cell-ontology-class_donors_tissue-labels
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n Tabula_Sapiens -i $< -o $@ -m
 
-ingest/HuBMAP.sql: input/hubmap_reference_matrix_v1.tsv
+ingest/HuBMAP.sql: input/hubmap_full_reference_matrix_cleaned.tsv
 	make PYTHON=$(PYTHON) ensure-db
 	mkdir -p ingest
 	$(PYTHON) 11_ingest_standard_form.py -n HuBMAP -i $< -o $@ -m
