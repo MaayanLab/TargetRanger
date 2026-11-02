@@ -1,5 +1,32 @@
 /** 
  * @swagger
+ *  /api/fileparse:
+ *    post:
+ *      summary: Convert gene count matrix into object ready for query_db_targets
+ *      description: Computes gene statistics ready for t-test query
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                level:
+ *                  type: boolean
+ *                  description: Whether to expect transcripts (true) or genes (false)
+ *                text:
+ *                  type: string
+ *                  description: tab separated vector containing a gene count matrix, samples on columns, genes on rows
+ *      responses:
+ *        200:
+ *          description: An object ready for query_db_targets / query_db_targets_transcript
+ *          content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example: {"stats": {"n": 5, "genes": {"A2M": {"mean": 5000.00, "std": 25.25}}}}
+ * 
+ * @swagger
  *  /api/query_db_targets:
  *    post:
  *      summary: Identify upregulated targets
