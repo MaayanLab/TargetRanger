@@ -43,3 +43,6 @@ volumes:
     x-kubernetes:
       className: gp2
       size: 25Gi
+
+x-kubernetes:
+  name: targetranger
