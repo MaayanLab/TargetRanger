@@ -34,8 +34,8 @@ export default function Footer() {
                         </a>
                     </div>
                     <div className={styles.githubButtons}>
-                        <a className={styles.buttonLink} href="https://github.com/MaayanLab/single-gene-expression-dashboard" target="_blank" rel="noopener noreferrer"><Button variant="contained" color="primary"><img style={{ borderRadius: '5px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GitHub-Mark.png"} alt="GitHub Logo" width={16} height={16} />&nbsp;View source code</Button></a>
-                        <a className={styles.buttonLink} href="https://github.com/MaayanLab/single-gene-expression-dashboard/issues/new" target="_blank" rel="noopener noreferrer"><Button variant="contained" color="primary"><img style={{ borderRadius: '5px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GitHub-Mark.png"} alt="GitHub Logo" width={16} height={16} />&nbsp;Submit an issue</Button></a>
+                        <a className={styles.buttonLink} href="https://github.com/MaayanLab/targetranger" target="_blank" rel="noopener noreferrer"><Button variant="contained" color="primary"><img style={{ borderRadius: '5px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GitHub-Mark.png"} alt="GitHub Logo" width={16} height={16} />&nbsp;View source code</Button></a>
+                        <a className={styles.buttonLink} href="https://github.com/MaayanLab/targetranger/issues/new" target="_blank" rel="noopener noreferrer"><Button variant="contained" color="primary"><img style={{ borderRadius: '5px' }} src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + "/images/GitHub-Mark.png"} alt="GitHub Logo" width={16} height={16} />&nbsp;Submit an issue</Button></a>
                     </div>
                 </div>
                 <div className={styles.verticalFlexbox}>
