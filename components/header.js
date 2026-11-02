@@ -21,7 +21,7 @@ export default function Header() {
                 <div className={styles.rightDiv}>
                         <div className={styles.verticalFlexbox}>
                         <b style={{fontSize: '16px', marginBottom: '5px'}}>Explore single gene expression across tissues and cell types with:</b>
-                        <Link href={runtimeConfig.NEXT_PUBLIC_GENERANGERURL} ><a style={{textDecoration: 'none'}}><img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/GeneRangerLogo.png'} alt="Logo" width={50} /><div className={styles.sisterSite}><b>GeneRanger</b></div></a></Link>
+                        <Link href={runtimeConfig.NEXT_PUBLIC_GENERANGERURL} style={{textDecoration: 'none'}}><img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/GeneRangerLogo.png'} alt="Logo" width={50} /><div className={styles.sisterSite}><b>GeneRanger</b></div></Link>
                         </div>
                         
                 </div>
@@ -39,7 +39,7 @@ export default function Header() {
                     <div className={styles.rightDiv}>
                         <div className={styles.verticalFlexbox}>
                         <b style={{fontSize: '16px', marginBottom: '5px'}}>Explore single gene expression across tissues and cell types with:</b>
-                        <Link href={runtimeConfig.NEXT_PUBLIC_GENERANGERURL} ><a style={{textDecoration: 'none'}}><img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/GeneRangerLogo.png'} alt="Logo" width={50} /><div className={styles.sisterSite}><b>GeneRanger</b></div></a></Link>
+                        <Link href={runtimeConfig.NEXT_PUBLIC_GENERANGERURL} style={{textDecoration: 'none'}}><img src={runtimeConfig.NEXT_PUBLIC_ENTRYPOINT + '/images/GeneRangerLogo.png'} alt="Logo" width={50} /><div className={styles.sisterSite}><b>GeneRanger</b></div></Link>
                         </div>
                         
                     </div>
