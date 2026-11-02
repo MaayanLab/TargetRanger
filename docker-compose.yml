@@ -1,17 +1,45 @@
-version: '3'
 services:
-  app:
-    platform: linux/x86_64
+  targetranger-app:
     build: .
-    image: maayanlab/targetranger:0.4.14
-    environment:
-      - POSTGRES_HOST=localhost
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE_URL='postgres://postgres:${POSTGRES_PASSWORD}@127.0.0.1:5432/postgres?sslmode=disable'
-      - NEXT_PUBLIC_DOWNLOADS=https://minio.dev.maayanlab.cloud/generanger/
-      - NEXT_PUBLIC_TARGETRANGERURL=https://targetranger.dev.maayanlab.cloud/targetscreener
-      - NEXT_PUBLIC_ENTRYPOINT=
+    image: maayanlab/targetranger:0.4.15
+    pull_policy: if_not_present
+    platform: linux/amd64
     ports:
-      - 3000:80
+    - 3000
+    x-kubernetes:
+      annotations:
+        maayanlab.cloud/ingress: https://targetranger.maayanlab.cloud
+        nginx.ingress.kubernetes.io/proxy-body-size: '100M'
+    deploy:
+      resources:
+        limits:
+          cpus: '.25'
+          memory: 1G
+        reservations:
+          cpus: '0.1'
+          memory: 512M
+    restart: unless-stopped
+    environment:
+    - DATABASE_URL=${PROD_DATABASE_URL:-postgres://postgres:${POSTGRES_PASSWORD}@targetranger-db-2:5432/postgres?sslmode=disable}
+    - NEXT_PUBLIC_DOWNLOADS
+    - NEXT_PUBLIC_ENTRYPOINT
+    - NEXT_PUBLIC_GENERANGERURL
+    - NEXT_PUBLIC_TARGETRANGERURL
+
+  targetranger-db-2:
+    build: ETL
+    image: maayanlab/postgres-py:14.4-2
+    pull_policy: if_not_present
+    platform: linux/amd64
+    ports:
+    - 5438:5432
+    environment:
+    - POSTGRES_PASSWORD
+    volumes:
+    - targetranger-db-2:/var/lib/postgresql/data
+
+volumes:
+  targetranger-db-2:
+    x-kubernetes:
+      className: gp2
+      size: 25Gi

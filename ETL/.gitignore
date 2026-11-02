@@ -7,3 +7,4 @@ input
 ingest
 preprocessed
 __pycache__
+.venv
