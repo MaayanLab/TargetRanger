@@ -13,7 +13,7 @@
  *              properties:
  *                level:
  *                  type: boolean
- *                  description: Whether to expect transcripts (true) or genes (false)
+ *                  description: Whether to expect transcripts (false) or genes (true)
  *                text:
  *                  type: string
  *                  description: tab separated vector containing a gene count matrix, samples on columns, genes on rows
