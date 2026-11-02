@@ -1,7 +1,7 @@
 services:
   targetranger-app:
     build: .
-    image: maayanlab/targetranger:0.4.15
+    image: maayanlab/targetranger:0.4.16
     pull_policy: if_not_present
     platform: linux/amd64
     ports:
