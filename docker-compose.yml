@@ -27,8 +27,12 @@ services:
     - NEXT_PUBLIC_TARGETRANGERURL
 
   targetranger-db-2:
-    build: ETL
-    image: maayanlab/postgres-py:14.4-2
+    build:
+      context: ETL
+      dockerfile: Dockerfile.pg14
+      platforms:
+      - linux/amd64
+    image: maayanlab/postgres-py:14.24
     pull_policy: if_not_present
     platform: linux/amd64
     ports:
